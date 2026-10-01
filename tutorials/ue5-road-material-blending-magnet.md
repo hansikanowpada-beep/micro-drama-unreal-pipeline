@@ -13,9 +13,10 @@ one is specifically about building a custom road/ground surface using a
 multi-layer blend material system, not character animation or Sequencer
 work. Kept as its own file per the note at the end of the other one.
 
-Status: **partial capture** — covers through building a debris pile
-near ruined buildings (chapter 8, cut off mid-sentence). More to be
-added as further transcript/screenshots are shared.
+Status: **partial capture** — covers through widening the whole scene
+layout and starting the landscape material (chapter 10, cut off
+mid-sentence). More to be added as further transcript/screenshots are
+shared.
 
 ## Chapter 1: Introduction
 
@@ -358,7 +359,7 @@ slots plus vertex-color mesh painting to control where each shows.
    aligned — repeat across the whole area, mixing which of the 8 unique
    buildings gets reused where.
 
-## Chapter 8: Environmental debris (partial — cuts off mid-sentence)
+## Chapter 8: Environmental debris
 
 1. **Rubble/debris props**: Content Browser → Ruined Modern Buildings
    folder → enable the **Static Mesh** filter → find rubble/debris
@@ -381,13 +382,108 @@ slots plus vertex-color mesh painting to control where each shows.
    different rotation, and keep stacking/duplicating pieces near the
    base of buildings to build up a convincing debris pile, scaling
    individual pieces down as needed for the smaller fragments.
+6. **"Flying" debris**: select a debris piece, rotate it, and position it
+   floating mid-air (frozen in place, not simulated physics) near a
+   building — a cheap way to suggest an explosion/collapse moment.
+   Re-material it with the same Mossy material as everything else.
+7. Add **ivy onto the rubble too**: back to the Foliage tool, select the
+   ivy plant(s) again, paint them directly onto the rubble pieces
+   ("ravels" in the transcript) for consistency with the buildings.
 
-*Transcript cuts off mid-sentence here ("...so we can use this one. And
-then we're going to decrease its scale. So...") — likely continues the
-debris-piling process.*
+## Chapter 9: Vehicles and ruined props
+
+1. **Sourcing vehicles**: Fab → the tutorial uses the **City Sample
+   Vehicles** pack → **Add to Project**.
+2. The downloaded folder contains several numbered vehicles (e.g.
+   "Vehicle 3"):
+   - Open a vehicle's folder — it has a **Blueprint** for the vehicle
+     and a **Mesh** subfolder with its static mesh.
+   - Drag the static mesh vehicle into the scene, rotate it into
+     position.
+3. **"Ruining" the vehicle** (it looks too new/clean by default):
+   - Download a **Rusty Painted Metal Sheet** material from Fab → Add to
+     Project.
+   - Reuse the existing road blend-material system rather than building
+     a new one from scratch: select the road/ground plane, in its
+     Details panel click the magnifying-glass **"browse to asset"**
+     button to locate the existing road blend material instance.
+   - Right-click it → **Create Duplicate** — this is now a separate
+     material instance you can safely modify without affecting the
+     road.
+   - Open the duplicate, and replace its texture-slot assignments: go to
+     **Fab folder → Mega Scans → Surfaces → Rusty Painted Metal Sheet →
+     Textures**, and swap each slot (Albido/Height/Normal/Roughness) in
+     the duplicated instance for these new rusty-metal textures. Save,
+     close.
+   - Apply this new rusty-metal material instance onto the vehicle.
+4. **Mesh-paint weathering onto the vehicle**: select the vehicle →
+   Selection mode → **Mesh Paint** → Select → **Add** the vehicle as a
+   paint target → **Paint**.
+   - Disable Blue and Green channels, keep only **Red** active, paint to
+     apply a moss/weathering layer onto the body.
+   - Adjust the Directional Light position (**Ctrl+L**) to see the
+     result more clearly if needed.
+   - Apply the same **Mossy** material (Fab → Mega Scans → Surfaces)
+     specifically onto the **tires** and the **grille**.
+   - **Puddles on the vehicle**: Mesh Paint → Paint tab → select **Blue**
+     channel, disable Red → paint puddle patches onto the vehicle
+     surface for a wet/reflective look (same puddle-layer feature from
+     Chapter 5, reused here on the vehicle's material).
+5. Repeat the same "ruin it" technique on other vehicles (e.g. a bus),
+   duplicating placed vehicles as needed. Also download more variety
+   from Fab — the tutorial adds a free pack called (as transcribed)
+   **"Old Abandoned Rusty Cars"**.
+
+## Chapter 10: Expanding the city scene
+
+1. After downloading the abandoned-cars pack: open its **Overview**
+   folder, open the level inside it, and save progress — this gives
+   access to a few more pre-made vehicle types (including a motorcycle).
+2. **Package vehicles as Level Instances** too (same technique as the
+   buildings in Chapter 6): select a vehicle (with its related assets),
+   right-click → **Level → Create Level Instance**, save into the
+   **Levels** folder (e.g. "Vehicle One"). Repeat for the bus and other
+   vehicle types.
+3. Reopen the main **"tutorial"** level and its Sequence, activate
+   (pilot) the camera again.
+4. From the Content Browser's **Levels** folder, drag the vehicle Level
+   Instances into the scene. Swap/replace a placed vehicle for a
+   different one by deleting it and dragging in another from the Levels
+   folder.
+5. **Tip**: press **G** to toggle **Game View**, which hides editor
+   icons/gizmos for a cleaner look at the actual scene while checking
+   composition (press again, or the same key, to return to the normal
+   editor view).
+6. **Troubleshooting — invisible vehicle back face**: after applying the
+   rusty-metal material to a newly placed vehicle, part of it (the back
+   side) wasn't rendering.
+   - Fix: open the material instance, find **Material Property
+     Overrides**, enable **Two Sided** — resolves surfaces that were
+     being culled as back-facing.
+7. Not every vehicle needs the weathering treatment — some look fine
+   left with their default/clean material; this is a judgment call per
+   vehicle.
+8. Scatter more duplicated vehicles around the scene; nudge some
+   buildings slightly higher if their base positioning looks off.
+9. **Troubleshooting — scene/road too narrow**: noticed the roadway read
+   as too narrow once more props were in. Widen the whole layout:
+   - Select the buildings on one side, move them further outward.
+   - Select the vehicles, move them outward to match.
+   - Select the foot paths, move them outward too.
+   - Select the **road** itself, move and **increase its scale** to
+     actually widen it.
+   - Reposition vehicles/foot paths again to sit correctly relative to
+     the now-wider road, and increase the foot paths' scale to match.
+10. **Landscape material**: apply the same **Mossy** material (Fab →
+    Mega Scans → Surfaces) to the base landscape too, so exposed ground
+    beyond the road/props reads consistently with everything else.
+
+*Transcript cuts off mid-sentence here ("...so we go to this fab folder
+and we go to the mega scans folder. Go to the surfaces.") — likely
+continues finishing the landscape material application.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing environmental debris, any further lighting, or final
-export) and this file will be updated.*
+video (finishing the landscape material, any further lighting, or final
+export/rendering) and this file will be updated.*
