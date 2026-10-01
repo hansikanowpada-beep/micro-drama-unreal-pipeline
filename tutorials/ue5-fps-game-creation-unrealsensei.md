@@ -23,14 +23,13 @@ Status: **partial capture** — covers the intro, all the foundational
 editor basics (chapters 3-4), Blueprint editor vocabulary (chapter 5),
 node-graph fundamentals, migrating assets (chapter 6-7), a finished
 `BP_Target` with hit detection restricted to actual projectiles via a
-Cast node (chapter 8), and a fully working score system (chapter 9) —
-`GM_TargetGame`'s `CurrentScore` Integer variable incremented via a
-cross-Blueprint custom event call from each Target, with a Boolean
-`IsHit?` flag + Branch node fixing a repeat-hit exploit. Chapter 10
-(User Interfaces, UMG) has just started — cut off right after creating
-a blank `WBP_UI` Widget Blueprint. Win/lose conditions, the countdown
-timer, Chaos physics destruction, and final assembly haven't been
-covered yet.
+Cast node (chapter 8), a fully working score system (chapter 9), and a
+complete working score UI (chapter 10) — anchors for responsive
+layout, a widget-instance reference stored via Promote to Variable so
+the Game Mode can call a custom event *inside* a specific widget, and
+an Append node formatting the display as "Score N". Win/lose
+conditions, the countdown timer, Chaos physics destruction, and final
+assembly haven't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -706,15 +705,126 @@ just inspecting the existing First Person Character Blueprint earlier):
    the basic/default widget type → name it **`WBP_UI`** (`WBP_` prefix
    convention for Widget Blueprints, `UI` suffix since this will be the
    player's main on-screen interface during gameplay).
-4. Double-click to open it — shows the widget designer canvas.
+4. Double-click to open it — shows the widget designer canvas. In the
+   top-left is the **Palette**, containing every UI element type that
+   can be displayed to the player.
+5. **Canvas Panel**: the very first element any new Widget Blueprint
+   needs — drag one in before anything else. It's the root container
+   everything else gets placed inside.
+6. Move the Details panel aside for a clearer view. Navigation controls
+   in the designer are the same as the Blueprint graph: hold RMB to
+   pan, scroll wheel to zoom.
+7. **Adding text**: drag a **Text** element from the Palette onto the
+   canvas.
+8. **Anchors** (the small flower-shaped icon on a selected widget):
+   control how that element repositions itself relative to the screen
+   as the window is resized — this is UMG's equivalent of responsive
+   web design. Either drag the anchor icon directly to a corner (e.g.
+   top-left), or use the **Anchors** dropdown in the Details panel to
+   pick a preset (top-left, top-right, center, etc.).
+   - Each added text element also gets renamed in the **Hierarchy**
+     panel for organization (distinct from the actual text it
+     displays) — e.g. the first one is named **"Top Left"**.
+9. **Demonstrating anchors**: duplicate the text element (**Ctrl+C /
+   Ctrl+V**), drag the copy to the top-right corner, set its anchor to
+   top-right, rename it "Top Right." Duplicate again, drag to the
+   center, set its anchor to Center, rename it "Center."
+   - Press **Compile**, then **Play** — resizing the game window shows
+     the Center text staying centered and the Top Left/Top Right texts
+     staying pinned to their respective corners regardless of window
+     size — exactly what anchors are for, since not every player's
+     window is the same resolution/aspect ratio (ultrawide monitors,
+     1:1 setups, etc. all need the UI to stay correctly positioned).
+10. Delete the "Center" and "Top Right" demo texts — only "Top Left" is
+    actually needed for the real score display. Rename it **"Score"**.
+11. **Resize the text**: default size is too small. Select it →
+    **Appearance → Size** — tries **64** (too large, would dominate the
+    screen), settles on **45-50** as a reasonable final size.
 
-*Transcript cuts off here, right as the Widget Blueprint's designer
-canvas is introduced ("here in the middle is...") — likely continues
-into actually laying out score text on screen.*
+**Wiring the score display to real data** (the Widget Blueprint's own
+Graph tab, not just the static Designer view):
+
+12. Clean the graph of any leftover demo nodes. Rename the Text widget
+    to **"Score Text"** in the Hierarchy, for a clear, easy-to-find name
+    once referencing it from code.
+13. **Expose it to the graph**: select the Score Text widget, enable its
+    **"Is Variable"** checkbox (this is what makes a design-time widget
+    element referenceable from Blueprint logic) — then drag it into the
+    graph as **Get Score Text**.
+14. Drag from that output, type **"Set Text"**, select the Set (Text)
+    node — this is what actually changes the text displayed on screen.
+    Demo: feed in the literal text `Hello World` and connect to **Event
+    Construct** (widgets don't have `Event Begin Play` — their
+    equivalent, which fires as soon as the widget itself is created, is
+    called **Event Construct**).
+    - Press Play — "Hello World" now shows where "Score" used to be,
+      confirming the Set Text wiring works.
+15. **Wiring in the real score value**: need `CurrentScore` from the
+    Game Mode instead of a literal string:
+    - Drag out, type **"Get Game Mode"**, drag from its output, type
+      **"Cast To GM_TargetGame"** (same casting pattern as `BP_Target`
+      in Chapter 9), then from that cast's success output drag and type
+      **"Get Current Score"**.
+    - An Integer can't plug directly into Set Text's Text input — hover
+      the pin and Unreal auto-offers a conversion node (int-to-string,
+      shown in the purple "String" wire color) — accept it.
+    - Compile, Save. Firing at targets still doesn't update the display
+      yet, though.
+16. **The real problem**: `Event Construct` only fires *once*, when the
+    widget is first created — so this logic runs a single time and
+    never again, instead of updating every time a target is hit. The
+    Set Text logic needs to be called again each time `Add Score` runs
+    in the Game Mode.
+17. **Getting a reference to this specific widget instance** (needed so
+    the Game Mode can call logic *inside* it, not just its generic
+    class):
+    - Back where the Game Mode originally creates the widget (`Event
+      Begin Play` → `Create Widget` → `Add to Viewport`, from Chapter
+      9): drag from the **Create Widget** node's **Return Value**
+      output pin — this holds a reference to the exact widget instance
+      just created.
+    - **Shortcut — Promote to Variable**: right-click directly on that
+      output pin and select **"Promote to Variable"** — automatically
+      creates a correctly-typed variable (here, one that can hold a
+      `WBP_UI` reference) without manually going through the Variables
+      panel's **+** button. (This works on essentially any output pin —
+      also handy for quickly promoting an Integer or other value to a
+      variable.)
+    - Alternative manual method also shown: creating a variable and
+      typing the specific widget class name (`WBP_UI`) instead of
+      picking from the normal type list, then choosing **Object
+      Reference** as its type.
+    - **Alt+drag** this new variable into the graph to auto-create a
+      **Set** node, and plug the Create Widget node's Return Value into
+      it — stores the widget reference for later use.
+18. **Calling into the widget from the Game Mode's Add Score event**:
+    Ctrl+drag the widget-reference variable into the `Add Score` custom
+    event's graph as a **Get**, then drag from it and call a new custom
+    event to be created in the widget — **"Update Score"**.
+    - Delete the earlier debug `Print String` node from `Add Score`
+      (no longer needed now that real UI exists) and route this call to
+      Update Score in its place.
+19. Press Play — the score display now correctly updates to 1, 2, 3 as
+    targets are hit, driven by the real `Add Score` → `Update Score`
+    call chain instead of a one-time `Event Construct` run.
+20. **Formatting the display text** — want it to read "Score 1" instead
+    of a bare "1":
+    - Back in the Widget Blueprint's graph: drag from an input pin and
+      type **"append"** (another case where **Context Sensitive**
+      needs to be unchecked if the node doesn't show up, per the
+      Chapter 6 note on that toggle) → select the **Append** node,
+      which combines two text pieces into one. It auto-creates two
+      helper string-conversion nodes alongside it.
+    - Wire: Sentence A = the literal text `Score ` (trailing space),
+      Sentence B = the `CurrentScore` integer (auto-converted to text).
+      Append combines them into e.g. "Score 1", "Score 2", etc.
+    - Compile, Save, Play — confirms "Score 1" / "Score 2" / "Score 3"
+      now displays correctly as targets are destroyed, completing the
+      working score UI.
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (building the score UI, win/lose conditions, the countdown
-timer, Chaos physics destruction, and adding the finished game to an
-environment) and this file will be updated.*
+video (win/lose conditions, the countdown timer, Chaos physics
+destruction, and adding the finished game to an environment) and this
+file will be updated.*
