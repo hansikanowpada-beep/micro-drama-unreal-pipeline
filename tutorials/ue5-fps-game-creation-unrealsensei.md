@@ -23,12 +23,14 @@ Status: **partial capture** — covers the intro, all the foundational
 editor basics (chapters 3-4), Blueprint editor vocabulary (chapter 5),
 node-graph fundamentals, migrating assets (chapter 6-7), a finished
 `BP_Target` with hit detection restricted to actual projectiles via a
-Cast node (chapter 8), and the start of a custom `GM_TargetGame` Game
-Mode — default pawn, a crosshair HUD, and an Integer variable used to
-store/read a value via Get and Begin Play (chapter 9, cut off right as
-Set is introduced to change that value at runtime). Win/lose conditions,
-the countdown timer, Chaos physics destruction, and final assembly
-haven't been covered yet.
+Cast node (chapter 8), and a fully working score system (chapter 9) —
+`GM_TargetGame`'s `CurrentScore` Integer variable incremented via a
+cross-Blueprint custom event call from each Target, with a Boolean
+`IsHit?` flag + Branch node fixing a repeat-hit exploit. Chapter 10
+(User Interfaces, UMG) has just started — cut off right after creating
+a blank `WBP_UI` Widget Blueprint. Win/lose conditions, the countdown
+timer, Chaos physics destruction, and final assembly haven't been
+covered yet.
 
 ## Chapter 1: Intro
 
@@ -607,18 +609,112 @@ just inspecting the existing First Person Character Blueprint earlier):
      variable correctly holds and outputs its stored value.
    - **Changing a variable's value at runtime**: drag the variable out
      again, this time choosing **Set** instead of Get — lets you
-     overwrite its stored value during gameplay (continuing from
-     `Event Begin Play`; the transcript cuts off right as this `Set`
-     node setup begins).
+     overwrite its stored value during gameplay. Demo: set it to
+     **-5** instead of its default 20, wire that into Print String —
+     confirms the value starts at 20, is immediately overwritten to -5
+     by `Set`, and -5 is what actually prints. This confirms how `Set`
+     works before using it for real.
+9. **Creating the real score-tracking variable**: delete the demo
+   variable, create a new one named **`CurrentScore`**, type
+   **Integer**.
+10. Drag it into the graph as **Get**, then drag from its output and
+    type **"++"** — selects the **Increment Integer** node, which adds
+    1 to the variable's current value and sets it in one step (e.g. 3
+    becomes 4).
+11. **Calling this from the Targets**: the increment logic needs to be
+    triggered by `BP_Target` whenever a target is actually hit — wrap
+    it in a **Custom Event**: right-click → type "custom events" →
+    Enter → name it **`Add Score`** → connect it to feed into the
+    Increment Integer node. Add a **Print String** after the increment
+    too (Duration **5**, text color **orange**) to visually confirm the
+    score as it changes.
+12. **Cross-Blueprint calling** — back in `BP_Target`'s event graph
+    (where `On Component Hit` → `Cast To BP_FirstPersonProjectile`
+    already lived from Chapter 8): right-click → type **"Get Game
+    Mode"** → returns the world's current Game Mode, but only as a
+    generic type. Drag from its output, type **"Cast To
+    GM_TargetGame"** → narrows it to the specific Game Mode class. From
+    that cast's output, drag again and type **"Add Score"** → Enter —
+    this calls the custom event just created in the Game Mode directly
+    from the Target. (Double-clicking an `Add Score` call node jumps
+    straight to that event's definition, for quick navigation between
+    Blueprints.)
+13. Press Play, fire at the first target — confirms **"1"** prints (then
+    2, then 3 for subsequent distinct targets) — cross-Blueprint custom
+    event calling confirmed working.
+14. **Bug found — exploit**: repeatedly hitting the *same* target over
+    and over keeps incrementing the score each time, letting a player
+    "win" by spamming one target instead of hitting all of them. Each
+    target needs to only count once.
+15. **Fix — a per-target Boolean flag**: in `BP_Target`'s Variables,
+    create a new one — default type is **Boolean**, change via the
+    type dropdown if needed — name it **`IsHit?`** (question-mark
+    naming convention for booleans, a personal style choice, not
+    required). This flag tracks whether *this specific target
+    instance* has already registered a hit.
+16. **Branch (the if-statement equivalent)**: described as "probably
+    the most essential node in Unreal Engine, or in programming in
+    general." Right-click → type "if" → select **Branch** (Unreal's
+    name for an if-statement), or use the shortcut: hold **B** and
+    left-click in the graph to create one directly.
+17. **Wiring the full fixed flow**: `On Component Hit` → `Cast To
+    BP_FirstPersonProjectile` (success) → **Branch** on `Get IsHit?` →
+    - **True** pin (already hit): left unconnected — nothing happens.
+    - **False** pin (not yet hit): → **Set IsHit? = True** (marks this
+      target as hit, so it won't pass this check again) → → `Cast To
+      GM_TargetGame` → `Add Score`.
+18. **Re-test**: hitting a target once adds to the score; hitting the
+    *same* target again does nothing (the Branch's True pin catches it
+    and stops); hitting the other distinct targets each adds correctly.
+19. **Optional cleanup/aesthetic tip** (not functionally required): to
+    have the main logic chain hang off the Branch's **True** pin
+    instead of False (purely for a visually tidier graph), insert a
+    **NOT Boolean** node between `Get IsHit?` and the Branch's
+    condition input — inverting the check to "is NOT hit," so the main
+    flow now reads as the True case.
+20. **More node shortcuts**:
+    - **Reroute/"Knot" node**: lets you bend a wire's path for
+      readability without changing what it connects — referred to in
+      the transcript as "adding a knot."
+    - **Ctrl+drag** a variable into the graph to auto-create a **Get**
+      node directly (skipping the Get/Set choice popup).
+    - **Alt+drag** a variable into the graph to auto-create a **Set**
+      node directly.
+21. **Recap of the finished Target-hit logic** (in the creator's own
+    words): "This event will run whenever our Target is hit, then we
+    check if it was the First Person Projectile that hit it, and if it
+    was we check whether this target has already been hit — and if it
+    hasn't, we set that variable to true so these nodes won't run again
+    in the future, then we tell the Game Mode to add a score to our
+    CurrentScore."
+22. In-game test confirms the score now correctly climbs 1, 2, 3 across
+    the three distinct targets — "the game is slowly forming," but with
+    one acknowledged problem: relying on a `Print String` to show the
+    score "looks kind of ugly" and isn't a real UI — motivating Chapter
+    10.
 
-*Transcript cuts off here, right as the `Set MyVar` node is being wired
-up — likely continues into actually incrementing the hit counter each
-time a target is destroyed.*
+## Chapter 10: User Interfaces
+
+1. Unreal's UI-building tool is **UMG** — "Unreal Motion Graphics UI
+   Designer." Goal here: build a real on-screen UI showing the player's
+   score (how many targets hit / remaining), replacing the Print String
+   placeholder.
+2. **Save everything first** — Save All / Save Selected — explicitly
+   called out as important practice before this next step.
+3. **Create a Widget Blueprint**: right-click in the Content Browser →
+   scroll down to **User Interface** → **Widget Blueprint** → choose
+   the basic/default widget type → name it **`WBP_UI`** (`WBP_` prefix
+   convention for Widget Blueprints, `UI` suffix since this will be the
+   player's main on-screen interface during gameplay).
+4. Double-click to open it — shows the widget designer canvas.
+
+*Transcript cuts off here, right as the Widget Blueprint's designer
+canvas is introduced ("here in the middle is...") — likely continues
+into actually laying out score text on screen.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (incrementing the hit counter on target destruction, win/lose
-conditions, the countdown timer, UI, Chaos physics destruction, and
-adding the finished game to an environment) and this file will be
-updated.*
+video (building the score UI, win/lose conditions, the countdown
+timer, Chaos physics destruction, and adding the finished game to an
+environment) and this file will be updated.*
