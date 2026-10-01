@@ -20,11 +20,12 @@ continuing, these notes should be merged into the other file instead.
 
 Status: **partial capture** — picks up with exporting/animating a
 MetaHuman in Sequencer, through video-based performance capture, a full
-hand-held Niagara fire-torch Blueprint (mesh + particles + light, with
-pivot/local-space tracking fixes), and the start of a flickering Light
-Function material (chapter 13, cut off). Chapters 1-9 (presumably
-covering actually building/customizing the MetaHuman character itself)
-are missing entirely.
+hand-held Niagara fire-torch Blueprint, a flickering Light Function
+material, a full post-processing camera-lens pass, and animated camera
+movement with a custom Perlin Noise camera shake and dynamically
+animated focus distance (chapter 15). Likely at or near the end of this
+video's content. Chapters 1-9 (presumably covering actually building/
+customizing the MetaHuman character itself) are missing entirely.
 
 ## (Picked up mid-stream) Animating the MetaHuman in Sequencer
 
@@ -211,26 +212,128 @@ are missing entirely.
 8. **Next planned step**: add flickering to the torch's point light via
    a custom **Light Function material** — transitions into Chapter 13.
 
-## Chapter 13: Lighting and materials (partial — cuts off mid-setup)
+## Chapter 13: Lighting and materials
 
-1. Content Browser → Content folder → right-click → **Create →
-   Material**, name it **"Light Material"**.
-2. Open it, select the material's root/output node, find **Material
-   Domain** → set it to **"Light Function"** (confirms this material is
-   meant to be plugged into a light actor to animate/modulate its
-   output — i.e. to drive the planned flicker effect).
-3. Right-click in the graph, search **"time"**, add a **Time** node.
+**Building the flickering Light Function material** (continuing from
+the Time node):
 
-*Transcript cuts off here, right after adding the Time node — likely
-continues building out the flicker logic (probably feeding Time through
-some noise/sine function into the light function's output) and then
-assigning this Light Function material to the torch's Point Light.*
+1. Add a **Scalar Parameter** node (press **S** + click), name it
+   **"Frequency"**.
+2. Add a **Multiply** node (press **M** + click) to combine the two:
+   connect **Time** → input A, **Frequency** → input B.
+3. Add a **Sign** node (right-click, search "sign"), connect it after
+   the multiply.
+4. Add a **Frac** (fractional part) node (right-click, search "frac"),
+   connect it in the chain.
+5. Connect the final result into the material's **Emissive/Emitter
+   Color** output.
+6. Set a value on the remaining input (tutorial uses **0.5**), **Apply**,
+   save, close the material.
+7. Right-click the material → **Create Material Instance**.
+8. **Apply to the light**: select the torch's Point Light → Details
+   panel → find the **Light Function Material** slot → assign the new
+   material instance. The light now flickers.
+9. **Tune the flicker**: open the material instance, enable the
+   **Frequency** parameter override, increase it (tutorial sets **1**),
+   save.
+10. **Duplicate the light** (right-click → Duplicate) — ends up with two
+    point lights on the torch, one steady and one flickering (for a
+    richer combined look rather than the whole torch glow pulsing
+    uniformly). Decrease the **Intensity** on both lights to balance
+    them against each other.
+11. **Light quality settings** (applied to the light(s)):
+    - **Source Radius**: tutorial tries **50**, settles on **10** — a
+      larger radius gives a visibly softer-edged shadow from the torch.
+    - **Volumetric Scattering**: tries **5**, settles around **2** for a
+      subtle glow/scatter in the air near the flame.
+12. Play to preview the lit, flickering torch in motion.
+
+## Chapter 14: Post-processing
+
+1. **Troubleshooting — unwanted/hard shadow**: select the Camera
+   Component, search **"mega light"** (**Mega Lights**, a newer UE5
+   lighting feature) and enable it from there — resolves the harsh
+   shadow.
+2. Minor reposition of the Niagara particle component on the torch.
+3. **Note on fire texture looking low-res in the editor viewport**: this
+   is just a real-time optimization/downsampling artifact — the
+   creator confirms it resolves once rendered at full/high quality, not
+   an actual problem to fix.
+4. **Remove the default Post Process Volume**: Outliner → search
+   "postprocess volume" → select the existing one → **delete** it (this
+   tutorial drives all post-processing from the Camera Component's own
+   settings instead, rather than a separate volume actor).
+5. **Camera lens pass** (Camera Component, same recipe as the
+   road/material-blending tutorial's final camera pass, with this
+   video's own specific values):
+   - **Squeeze Factor**: increase to maximum.
+   - **Sensor Width**: halve it (type `/2`, Enter) — paired anamorphic-
+     lens effect with Squeeze Factor.
+   - **Focus**: Focus settings → enable **Debug Focus Plane** → adjust
+     **Focus Distance** to bring the character into sharp focus.
+   - **Bloom**: enable, method = **Convolution**, decrease **Intensity**
+     slightly.
+   - **Chromatic Aberration**: enable, **Intensity** and **Start
+     Offset** both set to **0.5**.
+   - **Lens Flare**: enable, decrease **Intensity** to **0.1**.
+   - **Image Effects → Vignette**: enable, modest amount.
+   - **Film Grain**: enable, **Intensity** = **0.5**.
+   - **Aperture**: decrease slightly.
+6. This completes the base shot — character, prop (fire torch), and
+   camera lens treatment all combined.
+
+## Chapter 15: Camera animation
+
+1. Go to the first frame, select the camera's **Transform** track,
+   create a keyframe.
+2. Go to the last frame, move/reposition the camera to its end point.
+3. Play back — confirms the camera transitions between the two
+   positions.
+4. Select all the middle/default keyframes, right-click → set
+   interpolation to **Cubic** (smoother curve than Linear, used here for
+   the main camera move — same choice made for the POV shot earlier in
+   this video).
+5. **Camera shake** (same general Camera Shake Blueprint technique as
+   the companion environment-basics tutorial, with this video's own
+   specific values):
+   - Content Browser → Content folder → right-click → **Create
+     Blueprint** → All Classes → search "shake" → select the **Camera
+     Shake** base class.
+   - Name it **"Shake"**, open it, find the root **Shake Pattern**,
+     select **Perlin Noise Camera Shake Pattern** (transcript renders
+     this "parallel noise camera shake pattern" — a mis-transcription of
+     "Perlin Noise," matching the identical pattern/typo seen in the
+     companion environment-basics tutorial's camera-shake chapter).
+   - **Timing → Duration**: set to **0** (continuous/looping).
+   - Set an initial **Rotation** value (~1), **Compile**.
+   - Apply it to the camera: Sequencer → select the Camera → **+** →
+     **Camera Shake** option → select the "Shake" blueprint. Extend this
+     track across the timeline.
+   - Play — default shake looks too strong/off, tune it:
+     - **Rotation Frequency** = **2**, **Rotation Amplitude** = **0.5**.
+     - **Pitch** (expand) ≈ **4**.
+     - Decrease frequency to **0.5**. Compile.
+   - Still refining — decrease **Rotation Frequency** further to
+     **1.5**, compile, for a more subtle result.
+   - Zoom the camera slightly, re-fix focus on the character afterward
+     (the zoom changes framing/focus distance).
+6. **Animating Focus Distance over time** (since the camera now moves
+   continuously, a single static focus distance isn't enough to keep the
+   character sharp throughout):
+   - Go to the first frame, select the camera, find **Focal
+     Length**/Focus settings, enable **Debug Focus Plane**.
+   - Lock focus onto the character.
+   - Disable the Debug Focus Plane visualization once correct (it's just
+     an on-screen aid, not meant to show in the final render).
+   - Result: the character stays in focus continuously as the camera
+     moves and shakes.
+7. Play the assembled shot.
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the flickering light material, and ideally the missing
-chapters 1-9 covering the MetaHuman character's own creation) and this
-file will be updated. If this turns out to be the same video as
-`ue5-metahuman-animation-magnet.md` after all, these notes should be
-merged into that file instead.*
+video (any further polish, and the final rendering/export step — plus
+ideally the missing chapters 1-9 covering the MetaHuman character's own
+creation) and this file will be updated. If this turns out to be the
+same video as `ue5-metahuman-animation-magnet.md` after all, these notes
+should be merged into that file instead.*
