@@ -27,13 +27,14 @@ complete score UI (chapter 10), graph organization tools (chapter 11),
 dynamic target counting plus a working win condition (chapter 12), a
 complete `WBP_EndScreen` (chapter 13), a fully working countdown timer
 and lose condition (chapter 14), a complete `BP_Rifle` weapon
-Blueprint (chapter 15), and a complete custom `BP_Bullets` projectile
-— emissive tracer, correct collision/destroy-on-hit, spark/bullet-hole
-impact VFX, and a fix so bullets fire toward the crosshair (camera
-rotation) rather than drifting with the recoil animation (chapter 16).
-Chapter 17 (Chaos Physics destruction) has just started with a basic
-physics-simulation primer, cut off almost immediately. Final
-environment assembly hasn't been covered yet.
+Blueprint (chapter 15), a complete custom `BP_Bullets` projectile
+(chapter 16), and a near-complete Chaos Destruction system (chapter
+17) — physics simulation basics, Geometry Collections/Fracture with
+cascading layers, Mass Clamp tuning, and a bullet-triggered
+`FS_Master Field` radial force burst (spawn → trigger immediately →
+destroy itself) wired into the existing hit logic. Cut off right at
+the final live test. Only "adding the finished game to an environment"
+remains uncaptured, per the video's own stated scope.
 
 ## Chapter 1: Intro
 
@@ -1507,14 +1508,130 @@ Graph tab, not just the static Designer view):
    - By default, newly placed objects in Unreal are **not** physically
      simulated at all — they simply float in space with no physics
      applied unless it's explicitly turned on.
+3. **Enable physics**: select the object, Details panel → **Physics**
+   section → enable **Simulate Physics**. Pressing Play now, the object
+   falls to the ground and can be knocked around (e.g. kicked).
+4. **Tip — don't need to Play to test physics**: use **Simulate** mode
+   instead — the dropdown next to the Play button, or the shortcut
+   **Alt+S**. This runs the physics simulation live while you can still
+   fly around and edit the world freely, without possessing the player
+   character the way a full Play session does.
+   - While simulating, objects can be directly grabbed/moved in the
+     viewport to test interactions — e.g. pushing one box into another.
+5. **Troubleshooting — not every object can be moved during Simulate**:
+   only objects that are both set to **Movable** mobility *and* have
+   **Simulate Physics** enabled can be interacted with this way.
+   Unreal's default **Mobility** for any new object is **Static**
+   (never moves for the entire game, by design, for performance).
+   Demo: a default Sphere (Static) can't be moved during Simulate;
+   changing its Mobility to **Movable** makes it knockable "like we're
+   playing air hockey."
 
-*Transcript cuts off here, right at the start of the physics basics
-primer — likely continues into enabling "Simulate Physics" on an
-object, then into Chaos Fracture settings for breaking the target into
-pieces.*
+## Chapter 17 (continued): Chaos Destruction / Fracture
+
+The Mode Selector dropdown also has **Landscape** and **Foliage**
+modes, covered in the companion `ue5-starter-course-unrealsensei.md`
+tutorial instead — this video covers **Fracture** mode, Unreal's Chaos
+Destruction tool for breaking objects into pieces.
+
+1. Select the Target mesh to destroy. **Before fracturing**, reset its
+   **Rotation** to `0,0,0` and **Scale** to `1,1,1` — important so it
+   behaves correctly once reused/duplicated elsewhere.
+2. Mode Selector → **Fracture**.
+3. **Create a new Destruction object**: click **New**, choose a save
+   location (a "Targets" folder), accept the auto-generated name
+   (`SM_Target_GeometryCollection`) — objects that can be destroyed in
+   Unreal are called **Geometry Collections**.
+4. **Fracture tools panel**: choose a fracture pattern (e.g. "Brick"
+   would suit a brick wall specifically) — this tutorial leaves it at
+   the default **Uniform** pattern, with the default piece count of
+   **20**.
+5. Click **Fracture** — opens a results window (top-right) showing the
+   20 individual mesh pieces the object will now break into on impact.
+6. **Preview tool — Explode slider** (under View Settings): doesn't
+   change the actual geometry, it's purely a visualization aid —
+   increasing it separates the generated pieces visually so you can
+   inspect the fracture pattern more easily.
+7. **Multiple fracture layers (cascading destruction)**: with the
+   geometry collection's Root selected, click **Fracture** again — this
+   further subdivides each of the 20 existing pieces into smaller
+   sub-pieces, adding a second destruction layer. Repeat for as many
+   layers as wanted; this tutorial settles on **3 layers total** (the
+   first layer breaks first, then progressively smaller pieces from
+   the second and third layers).
+8. Reset the Explode slider to 0, click **Cancel** to exit Fracture
+   mode, back to normal Selection mode.
+9. **Troubleshooting — a debug "bone color" material appears on the
+   object**: this is a developer visualization aid showing the
+   different fracture pieces, not the real material. Fix: Details panel
+   → **General** → uncheck **"Show Bone Colors"** to restore the
+   original material.
+10. **Test**: Simulate (**Alt+S**) — the object falls to the ground but
+    doesn't break apart on its own: "at least for this object, it's
+    hard to destroy." Physics-based destruction needs enough force/
+    mass behind an impact to actually trigger breaking.
+11. **Tuning how easily it breaks**: open the Geometry Collection asset
+    itself (Content Browser), uncheck **"Mass As Density"**, set
+    **Minimum Mass Clamp** to **1** — lowers the force threshold needed
+    to break it.
+12. Re-test in Simulate mode: grab a separate Movable+Simulate-Physics
+    sphere, drag it down, and physically smash it into the Target —
+    confirms pieces now fly apart on impact. Described as "really fun,"
+    reminiscent of Garry's Mod-style physics sandboxes.
+13. **Design decision — destruction should be gameplay-driven, not
+    physics-driven**: don't want gravity/ambient physics alone to be
+    able to break a Target (e.g. just by existing in the world) — only
+    the player actually **firing at it** should trigger destruction.
+    Confirmed a Target left alone doesn't break on its own. Pressing
+    **Play** (the real game, not Simulate) and firing at a target does
+    nothing yet at this point — destruction isn't wired to the bullet's
+    hit logic.
+
+**Wiring destruction into the bullet's hit logic** — adding a burst of
+physical force exactly where a bullet lands, using Unreal's built-in
+force-field actor:
+
+14. In `BP_Bullets`' `Hit` event (same event already holding the
+    spark/bullet-hole VFX and `Destroy Actor` call from Chapter 16):
+    drag out, add **"Spawn Actor from Class"**, class = **`FS_Master
+    Field`** — a radial-force-field actor built directly into Unreal
+    Engine itself (found under the **Engine** content folder rather
+    than the project's own Content when browsed to via the
+    magnifying-glass button — its internals are "really complicated,"
+    not something to dig into, just use it as-is).
+15. **Spawn location**: drag from the `Hit` event's **Location** output
+    (same `Break Hit Result` pattern used for the sparks VFX in Chapter
+    16) → **"Make Transform"** (converts the bare Location vector into
+    a full Transform, with Rotation `0,0,0` and Scale `1`, which is
+    what Spawn Actor needs) → plug into Spawn Actor's transform input.
+16. Compile — confirms firing now spawns the force field at the
+    bullet's impact point, which pushes nearby physics objects, and
+    the existing spark/hole VFX and bullet destruction still happen too.
+17. **Troubleshooting — roughly a 1-second delay before the force
+    actually applies**: this is the Master Field actor's own default
+    built-in timing, not instant by design.
+    - **Fix — trigger immediately**: drag from the Spawn Actor node's
+      **Return Value**, add **"CE Trigger"** (a function specific to
+      this force-field actor class) → forces it to apply its burst of
+      force right away instead of waiting out the default delay.
+    - **Fix — make it a one-time burst, not a lingering field**: drag
+      from the Return Value again, add **"Destroy Actor"** — removes
+      the force-field actor itself immediately after it fires once, so
+      it reads as a quick impact burst rather than a continuous force
+      zone sitting in the world.
+    - This whole chain (spawn → trigger → destroy the field) runs
+      alongside the bullet's own existing `Destroy Actor` call, so
+      bullet cleanup and the force-field burst happen together on hit.
+18. Play, fire at a target —
+
+*Transcript cuts off here, right as this final live test begins
+("press play if I come over here and fire") — likely confirms the
+Target now physically breaks apart into fractured pieces specifically
+when shot, completing the Chaos Destruction feature.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing Chaos Physics destruction, and adding the finished
-game to an environment) and this file will be updated.*
+video (confirming the destruction test, and adding the finished game
+to an environment — the video's final remaining topic per the
+episode's own description) and this file will be updated.*
