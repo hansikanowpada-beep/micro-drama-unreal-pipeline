@@ -19,11 +19,13 @@ is distinct from the environment-building tutorials.
 Captured from the video transcript (screenshots, not watched directly)
 — double-check exact button labels against the live video.
 
-Status: **partial capture** — covers the intro and the very basics of
-viewport navigation/object manipulation (chapter 3, in progress). This
-is foundational material the creator explicitly says experienced users
-can skip — the real game-building content (Blueprints, UI, weapons,
-physics) hasn't started yet in the transcript.
+Status: **partial capture** — covers the intro and all the foundational
+editor basics (viewport navigation, object manipulation, the Content
+Browser, main UI panels, layout customization, Play mode, duplicating
+objects — chapters 3-4). This is all material the creator explicitly
+says experienced users can skip — the real game-building content
+(Blueprints programming, UI, weapons, Chaos physics) hasn't started yet
+in the transcript, but should begin in the next chapter.
 
 ## Chapter 1: Intro
 
@@ -125,9 +127,113 @@ with Unreal.
   otherwise-too-dark scene), **Lighting Only** (shows just the lighting
   contribution, no materials/textures) — normally left on **Lit** (the
   default) for regular work.
+- **Immersive Mode / F11**: toggles a true full-screen viewport, hiding
+  every editor panel so you can focus purely on the level. Game View
+  mode (**G**) can still be toggled on/off while in immersive mode.
+  Press **F11** again (or select Immersive Mode again) to exit back to
+  the normal windowed editor layout.
 
-*Transcript continues past this point — more to be added as further
-screenshots are shared.*
+**Adding objects to the world**:
+- The **Add** button in the toolbar lets you hover over categories and
+  drag in Unreal's built-in default assets — e.g. a **Sphere** (then
+  scale it up), or a new **Light** (e.g. a Rectangle Light to light up
+  a dark corner).
+- **Gotcha**: a newly added object's editor widget/icon may not be
+  visible if **Game View mode (G)** is still toggled on from earlier —
+  toggle it off to see the new object's gizmo/icon.
+- For **custom assets that are part of your own project** (not
+  Unreal's generic built-ins), use the **Content Drawer** instead of
+  the Add button — opens the **Content Browser**, which holds every
+  asset, code file, and content change that makes up your game.
+  Navigate it like a normal OS folder tree.
+  - **Shortcut**: **Ctrl+Space** opens/closes the Content Drawer from
+    anywhere, without needing to click the bottom-left button each time.
+  - **Search**: Content Drawer → search field → type a term (e.g.
+    "Cube") to filter for every matching asset across all folders, then
+    drag the one you want (e.g. a specific colored cube) into the
+    world.
+  - **Ctrl+B**: with an asset selected (in the viewport or Content
+    Browser), jumps the Content Browser straight to that asset's actual
+    folder location — genuinely useful once a project has hundreds of
+    nested folders and you're trying to figure out where, say, a "ramp"
+    asset actually lives (example: jumps to a Content → Prototyping →
+    Meshes folder).
+
+## Chapter 4: User Interface
+
+1. To see the Blueprint programming behind an object (previewed here,
+   covered in depth in the next chapter): Content Browser → Third
+   Person folder → Blueprints folder → double-click the character
+   Blueprint to open it.
+2. Close a Blueprint/window via its **X**, or drag its tab into the
+   main viewport area to dock it.
+
+**Main editor panels**:
+- **Details panel** (bottom-right by default): shows every property of
+  whatever's currently selected. Properties can be edited directly here
+  instead of via the viewport gizmos — e.g. select a Cube, go to
+  Details → **Scale** → type a precise Z-axis value (e.g. **2**)
+  instead of dragging the Scale gizmo by hand.
+- **Outliner** (above the Details panel by default): lists every object
+  in the world. Hover between the two panels and drag to resize either
+  one. Selection is **bidirectional**: selecting an object in the
+  Outliner selects it in the viewport and populates the Details panel,
+  and selecting an object in the viewport highlights it in the
+  Outliner too.
+- **Hide/unhide an object**: in the Details panel, hover the eye icon
+  next to the object's name and click to toggle visibility — or use
+  the shortcut key **H** with the object selected (select it again via
+  the Outliner afterward, since it's no longer clickable in the
+  viewport once hidden).
+- **Tip — recovering after flying away**: since holding RMB + scrolling
+  up makes the camera move very fast, it's easy to fly far enough that
+  you lose track of your whole world. Fix: select any object in the
+  **Outliner**, press **F** to instantly focus/snap the camera back to
+  that object's location.
+
+**Rearranging the UI layout**:
+- Hold the **left mouse button** on a panel's tab (e.g. "Details") and
+  drag to reposition/dock it elsewhere.
+- Drag a tab on top of another panel to merge them into a tabbed group
+  (switch between the two via sub-tabs at the bottom).
+- Drag a tab out into empty space in the middle of the screen to
+  **undock** it as a free-floating window — useful with multiple
+  monitors.
+- **Close a window**: click its **X**, or hover its tab and click the
+  **middle mouse button** as a shortcut.
+- **Hide without closing**: right-click a tab → **Hide Tab** — a small
+  blue triangle then appears in that corner; hover/click it to restore
+  the hidden tab.
+- **Reset to Unreal's default layout** if things get rearranged beyond
+  recovery: **Window** menu → **Load Layout** → **Default Editor
+  Layout** — restarts the engine with the original default window
+  arrangement.
+- **Opening a window that isn't currently visible**: the **Window**
+  menu lists every available panel, even hidden ones — e.g. **World
+  Settings** (commonly used, not shown by default). Selecting it from
+  the menu adds it as a new tab alongside Details, so you can switch
+  between the two.
+
+**Toolbar and Play**:
+- The toolbar (top of the editor) holds frequently-used buttons already
+  covered, like the **Add** tab.
+- **Play button**: starts an actual playable preview of the game —
+  since this project uses the Third Person template, pressing Play
+  spawns a walkable, jumpable third-person character immediately.
+  Press **Escape** to exit play mode and return to editing.
+- **Selection Mode dropdown**: switches between editor modes, e.g.
+  **Landscape** mode for terrain-sculpting tools (same mode used
+  throughout the companion `ue5-starter-course-unrealsensei.md`). This
+  tutorial is explicitly **programming-focused only** — it won't cover
+  what these other modes do; that's the subject of the separate
+  environment-design tutorial.
+- **Duplicating an object**: rather than dragging a fresh copy from the
+  Content Browser and redoing any custom Details-panel edits by hand,
+  select the object and press **Ctrl+D** to duplicate it directly,
+  preserving all its current properties/modifications.
+
+*Transcript cuts off here, right after introducing Ctrl+D — likely
+continues into the actual Blueprints programming chapter next.*
 
 ---
 
