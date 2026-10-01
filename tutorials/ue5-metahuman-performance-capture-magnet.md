@@ -19,10 +19,12 @@ tutorial unless corrected. If it turns out to actually be the same video
 continuing, these notes should be merged into the other file instead.
 
 Status: **partial capture** — picks up with exporting/animating a
-MetaHuman in Sequencer, through video-based performance capture and the
-start of a Niagara fire-effect addition (chapter 12, cut off). Chapters
-1-9 (presumably covering actually building/customizing the MetaHuman
-character itself) are missing entirely.
+MetaHuman in Sequencer, through video-based performance capture, a full
+hand-held Niagara fire-torch Blueprint (mesh + particles + light, with
+pivot/local-space tracking fixes), and the start of a flickering Light
+Function material (chapter 13, cut off). Chapters 1-9 (presumably
+covering actually building/customizing the MetaHuman character itself)
+are missing entirely.
 
 ## (Picked up mid-stream) Animating the MetaHuman in Sequencer
 
@@ -127,18 +129,107 @@ character itself) are missing entirely.
    the focal plane in the viewport) → adjust **Focus Distance** until
    the character reads sharp.
 
-## Chapter 12: Niagara fire effects (partial — cuts off at the start)
+## Chapter 12: Niagara fire effects
 
 1. Goal: add a fire-torch effect held in the character's hand.
-2. Plan to download a Niagara fire system asset — the transcript cuts
-   off right as the source is about to be named ("So for the Niagara
-   fire system, I'm going to download this asset. And after
-   download...").
+2. **Source Niagara asset**: a pack referred to as "Medieval Sewers
+   Dungeons" (transcript renders it "medival swear dungeons" — treat as
+   approximate). Inside it: a Niagara system folder → a **"Flame"**
+   Niagara system — double-click to open/inspect.
+3. **Build a complete, reusable fire torch as a Blueprint** (mesh +
+   particles + light combined, same "wrap it in an Actor Blueprint"
+   pattern as the wind-tree technique in the companion video):
+   - Content Browser → right-click → **Blueprint Class → Actor**, name
+     it **"FireTorch"**.
+   - Open it, add the torch's static mesh: Content Browser → Temple of
+     Cambodia folder (enable Static Mesh filter via the hamburger icon
+     if no filters show) → find a **"Fire Torch"** static mesh → in the
+     Blueprint, **+ Add** → search "static mesh" → add a **Static Mesh**
+     component → assign the fire torch mesh to it.
+   - Add the particle fire: **+ Add** → search "Niagara particle
+     system" → add it → assign the **Flame** Niagara system found above
+     (disable the Static Mesh filter, browse back to the Medieval Sewers
+     Dungeons Niagara folder) → position/rotate it onto the torch mesh.
+   - Add a light: **+ Add** → search "light" → **Point Light** →
+     position it over the torch flame, change its color to an
+     **orangish** tone in the Details panel.
+   - Save, **Compile**, close the Blueprint.
+4. Place the FireTorch blueprint into the scene.
+   - **Troubleshooting — exposure too high**: go to Sequencer, select
+     the camera, increase **Aperture**.
+5. **Attach the fire torch to the character's hand**:
+   - Bring the FireTorch blueprint into Sequencer: **Add → Add Actor
+     Track** → select it.
+   - **+** → **Attach** → select the character's BP actor → **Body** →
+     search "hand" → select the **hand_r** (right hand) socket.
+   - Reset the torch's Location, reposition it relative to the hand.
+   - Camera tweaks: decrease **Exposure** (search "exposure", set to
+     **10**) and decrease **Aperture**.
+   - **Scale down the torch**: open the FireTorch blueprint, select the
+     static mesh component in its Viewport, enable **Uniform Scale**,
+     decrease the value (tutorial sets **7**).
+   - Reposition the Niagara/fire component relative to the (now smaller)
+     mesh. **Compile**, close.
+6. **Troubleshooting — fire position doesn't track the torch correctly
+   during animation** (multiple related issues worked through in
+   sequence):
+   - First symptom: fire doesn't update position in real time as the
+     torch/hand moves. **Fix**: open the Niagara system, select the
+     particle system (emitter), enable **"Local Space"** → Compile,
+     Save, close. (Without this, the particle system simulates in world
+     space and lags behind a moving attachment.)
+   - Still slightly misaligned afterward → reposition the fire torch's
+     Niagara component again to correct the offset.
+   - Deeper symptom: when the character's animation **lowers the
+     torch** (a different hand pose), the fire visibly detaches/shifts
+     from the torch tip. **Root cause**: the Niagara particle system's
+     own pivot point sits in its **middle**, not at the torch tip, so
+     it doesn't track rotation around the right point.
+   - **Fix — move the Niagara system's pivot** (same "find and relocate
+     the pivot" concept as the lamp post's X-Form/Edit-Pivot fix in the
+     road/material tutorial, applied here inside the Niagara/particle
+     editor instead):
+     - Open the Niagara system, dock it, zoom into its viewport.
+     - Select the particle system, find its **Sprite Renderer**
+       settings, expand **Sprite Rendering**, find **"Default Pivot in
+       UV space"**.
+     - Hold **Ctrl** and drag/adjust this value (tutorial tries values
+       around **64-65**, likely a UV-space offset rather than world
+       units — confirm the actual control behavior against the live
+       video) until the pivot sits at the bottom of the particle system
+       instead of its middle.
+     - Compile the Niagara system, compile the Blueprint too, close
+       both.
+   - Reposition the torch once more and re-test — fire now stays
+     correctly anchored to the torch tip even as the character's hand
+     pose changes.
+   - Reposition the attached point light similarly for consistency.
+7. Remaining known issue, not yet resolved in the transcript: the fire's
+   **render resolution looks low** — the creator notes it "fixes over
+   time" (likely simulation warm-up or an anti-aliasing/render-setting
+   effect at final export, not fully explained here).
+8. **Next planned step**: add flickering to the torch's point light via
+   a custom **Light Function material** — transitions into Chapter 13.
+
+## Chapter 13: Lighting and materials (partial — cuts off mid-setup)
+
+1. Content Browser → Content folder → right-click → **Create →
+   Material**, name it **"Light Material"**.
+2. Open it, select the material's root/output node, find **Material
+   Domain** → set it to **"Light Function"** (confirms this material is
+   meant to be plugged into a light actor to animate/modulate its
+   output — i.e. to drive the planned flicker effect).
+3. Right-click in the graph, search **"time"**, add a **Time** node.
+
+*Transcript cuts off here, right after adding the Time node — likely
+continues building out the flicker logic (probably feeding Time through
+some noise/sine function into the light function's output) and then
+assigning this Light Function material to the torch's Point Light.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the Niagara fire effect, and ideally the missing
+video (finishing the flickering light material, and ideally the missing
 chapters 1-9 covering the MetaHuman character's own creation) and this
 file will be updated. If this turns out to be the same video as
 `ue5-metahuman-animation-magnet.md` after all, these notes should be
