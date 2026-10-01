@@ -13,8 +13,9 @@ one is specifically about building a custom road/ground surface using a
 multi-layer blend material system, not character animation or Sequencer
 work. Kept as its own file per the note at the end of the other one.
 
-Status: **partial capture** — covers through the start of mesh-paint
-layering (chapter 4, cut off mid-sentence). More to be added as further
+Status: **partial capture** — covers through placing ruined buildings
+and the start of a cross-project asset migration for ivy/plants
+(chapter 6, cut off mid-sentence). More to be added as further
 transcript/screenshots are shared.
 
 ## Chapter 1: Introduction
@@ -144,14 +145,122 @@ slots plus vertex-color mesh painting to control where each shows.
    - Set **Strength** to maximum (**1**).
    - Paint directly on the road mesh in the viewport to reveal the moss
      layer in chosen spots.
-6. Troubleshooting note (transcript cuts off here): after painting, the
-   newly-blended layer's displacement again looked too strong — same fix
-   pattern as Chapter 3 step 11 (reopen the material, lower that layer's
-   Displacement Amount parameter) was about to be repeated when the
-   transcript ends mid-sentence.
+6. **Troubleshooting — displacement on the painted layer**: after
+   painting, the layer's displacement looked too strong again. Fix,
+   confirmed in the next batch:
+   - Open the material, go down to the **B slot** (holds this "moss"
+     layer — transcript renders it "MOS"), find **Displacement Amount**
+     for B, enable it, decrease the value, save.
+   - Nudge the Directional Light position again (**Ctrl+L**) to clear
+     any resulting artifact, save.
+7. **Painting the second extra layer (C / dirt)**: in Mesh Paint, select
+   the **Green channel** and disable Red — painting now targets the
+   other blended layer (Material C) instead of B. Paint it into
+   different areas than the moss layer.
+   - Same displacement issue showed up here too, plus the layer's tiling
+     **size** looked too large: go to the **C material** section, enable
+     **Displacement Amount C** and decrease it; enable **Size C** and
+     increase it; fine-tune displacement again; save.
+8. Resume painting the moss layer (reselect it) as needed to build up
+   coverage.
+9. **Erasing a mis-painted layer**: hold **Shift** while painting to
+   erase/remove vertex-color paint instead of adding it.
+10. Save settings, close the Mesh Paint window.
+
+## Chapter 5: Detailing the road and pathways
+
+1. **Extend the road**: go back to Select mode, select the road
+   asset(s), increase their scale — use the mannequin (placed in Chapter
+   2) as a visual scale reference, disabling snapping as needed while
+   repositioning it to check proportions.
+2. **Duplicate the road**: hold **Alt** and drag an axis handle, same
+   duplicate pattern used throughout these tutorials.
+3. Select both road pieces together for the next step.
+4. **Troubleshooting — visibly repetitive tiling**: with the road
+   extended, the same texture pattern was noticeably repeating. Fix via
+   more Mesh Paint randomization:
+   - Mesh Paint mode → select the road asset(s) → Paint tab → select the
+     **Red channel** → paint some variation across the surface.
+   - To paint a second asset/layer at the same time: click **Select**,
+     choose the asset (double-click to select it), then also select an
+     additional asset, and paint again — note that selecting multiple
+     assets at once significantly increases the default brush size, so
+     reduce brush size manually afterward.
+5. **Puddles**: the blend material has a dedicated **Puddle Layer**
+   feature:
+   - Open the material, find **Puddle Layer**, enable and activate it.
+   - Puddles are painted using the **Blue channel** in Mesh Paint (so
+     between this and the earlier steps, the convention is: **Red** =
+     primary variation/moss, **Green** = dirt/trench layer, **Blue** =
+     puddles — each vertex-color channel drives a different blended
+     feature).
+   - Reduce brush size, then paint over low points/cracks to create
+     wet-looking patches.
+   - **Puddle properties** (back in the material, under the Puddle Layer
+     group): **Liquid Opacity** controls how opaque/visible the water
+     looks (increase for murkier water — the tutorial keeps it low for
+     clear water); **Water Height** controls the puddle surface's
+     height.
+   - Save, close.
+6. Switch back to Select mode — the road itself is finished. Next: foot
+   paths alongside it.
+7. **Foot paths**: sourced from a free **Quixel/Megascans** asset
+   (transcript renders the brand name as "Quicksell," almost certainly a
+   mis-transcription of "Quixel").
+   - Add to Project.
+   - In the Content Browser, enable the **Static Mesh** filter to narrow
+     results (if no filter controls are visible, click the hamburger/
+     three-line icon to reveal filter options first).
+   - Drag a footpath piece into the scene.
+   - Before rotating, enable **rotation snapping** and set the snap
+     angle to **5°**, then rotate the piece to **90°**.
+   - Increase its height as needed to sit correctly on the terrain.
+   - **Re-material it**: go to the Fab-downloaded materials (Surfaces
+     category — deselect the Static Mesh filter to see materials again)
+     and apply the **Mossy Concrete** material (from Chapter 4) onto the
+     footpath piece — blends it visually with the rest of the scene.
+   - Duplicate footpath pieces (Alt+drag) to extend the path's length.
+
+## Chapter 6: Building design and ruins
+
+1. For building assets, the tutorial's preferred pack ("Ruin Modern
+   Buildings") is explicitly **not a free asset** — noted as usable only
+   if you already own it.
+   - Free alternative: on Fab's home page, search **"broken buildings"**
+     in the search bar — turns up a free broken-building asset pack.
+     **Add to Project**.
+2. After download: open the downloaded "Ruined Modern Buildings" folder,
+   go to its **Assets → Mesh** subfolder, enable the **Static Mesh**
+   filter to see just the building meshes.
+3. Drag a building into the scene, rotate and reposition it to place it
+   as a ruined structure within the environment.
+4. Plan (stated, not yet executed at this point in the transcript): add
+   ivy/climbing-plant assets and the same mossy textures onto the
+   buildings for a more weathered/ruined look.
+5. **Sourcing ivy/plant assets** — from a large asset pack the tutorial
+   calls "Electric Dim Environment" (transcript's rendering of the name
+   — treat as approximate, verify the actual pack title when sourcing
+   it yourself). Notable because of the asset-transfer technique it
+   demonstrates:
+   - This pack downloads as its **own separate Unreal project**, not
+     directly into your working project.
+   - Open that separate downloaded project.
+   - Inside it, navigate to an **"Assembly"** folder, enable the
+     **Blueprint Class** filter to show just its Blueprint assets.
+   - Select all of them.
+   - Right-click → **Asset Actions → Migrate** — this is Unreal's
+     built-in way to copy assets (with their dependencies) from one
+     project into another.
+   - When prompted, specify the destination: browse to your **actual
+     working project's Content folder** and select it as the migration
+     target.
+
+*Transcript cuts off mid-sentence here ("...after migrate we'll get this
+assembly folder over here. And if we...") — likely continues into
+placing the migrated ivy/plant blueprints onto the ruined buildings.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the paint layering, any further set dressing, lighting,
-or export) and this file will be updated.*
+video (finishing the building/ivy set dressing, any further lighting or
+export) and this file will be updated.*
