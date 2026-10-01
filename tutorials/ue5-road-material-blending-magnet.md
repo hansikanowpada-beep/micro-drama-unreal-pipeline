@@ -255,12 +255,41 @@ slots plus vertex-color mesh painting to control where each shows.
      working project's Content folder** and select it as the migration
      target.
 
-*Transcript cuts off mid-sentence here ("...after migrate we'll get this
-assembly folder over here. And if we...") — likely continues into
-placing the migrated ivy/plant blueprints onto the ruined buildings.*
+6. After migrating, the **Assembly** folder appears in your actual
+   project's Content Browser — enable the **Blueprint Class** filter
+   there to see the migrated assets.
+7. **Adding ivy to the building**: disable the Blueprint Class filter,
+   browse down to a (also-migrated) **Mega Scans** folder, enable the
+   **Static Mesh** filter — this shows all the Megascans-style meshes
+   that came with the pack, including the ivy plants.
+8. **Foliage-paint the ivy onto the building** (Unreal's Foliage system,
+   same tool as the environment tutorial's Chapter 8, but here painting
+   onto a building's walls rather than ground):
+   - Switch to **Selection mode → Foliage**.
+   - Select the ivy plant mesh(es), add to the foliage palette.
+   - **Paint Density**: increase to maximum (**1**).
+   - Brush size defaults too large when multiple assets are selected —
+     decrease it.
+   - With the ivy assets selected in the palette, go to their
+     **Density** setting and increase it (tutorial sets **500**).
+   - To allow painting on **vertical surfaces** (building walls, not
+     just flat ground) find the **slope angle** setting and increase it
+     to **180** — this is what permits foliage to also stick to steep/
+     vertical faces instead of only near-flat ground.
+   - Paint the ivy directly onto the building. If more density is
+     wanted, increase it further (tutorial bumps it from 500 to **800**
+     for denser coverage).
+9. **Root assets**: back to Select mode, disable the Static Mesh filter,
+   return to the **Assembly** folder, re-enable the **Blueprint Class**
+   filter to find additional blueprint assets (root-system props) from
+   the same migrated pack, to place around/under the building.
+
+*Transcript cuts off mid-sentence here ("...so maybe we come over here
+and we...") — likely continues into actually placing the root-system
+blueprints.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the building/ivy set dressing, any further lighting or
-export) and this file will be updated.*
+video (finishing the building/ivy/roots set dressing, any further
+lighting or export) and this file will be updated.*
