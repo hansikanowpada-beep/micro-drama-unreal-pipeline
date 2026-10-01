@@ -19,13 +19,15 @@ is distinct from the environment-building tutorials.
 Captured from the video transcript (screenshots, not watched directly)
 — double-check exact button labels against the live video.
 
-Status: **partial capture** — covers the intro and all the foundational
-editor basics (viewport navigation, object manipulation, the Content
-Browser, main UI panels, layout customization, Play mode, duplicating
-objects — chapters 3-4). This is all material the creator explicitly
-says experienced users can skip — the real game-building content
-(Blueprints programming, UI, weapons, Chaos physics) hasn't started yet
-in the transcript, but should begin in the next chapter.
+Status: **partial capture** — covers the intro, all the foundational
+editor basics (chapters 3-4, skippable for experienced users per the
+creator), an introduction to Blueprint editor vocabulary using the
+existing Third Person character (chapter 5), and the start of the
+actual FPS project — downloading the tutorial's asset pack, creating
+the First Person template project, and a first look at Events/
+executable wires in the bundled First Person Character Blueprint
+(chapter 6, cut off). Building custom Blueprints from scratch for this
+specific game hasn't started yet.
 
 ## Chapter 1: Intro
 
@@ -230,14 +232,145 @@ with Unreal.
 - **Duplicating an object**: rather than dragging a fresh copy from the
   Content Browser and redoing any custom Details-panel edits by hand,
   select the object and press **Ctrl+D** to duplicate it directly,
-  preserving all its current properties/modifications.
+  preserving all its current properties/modifications. The duplicate
+  lands exactly on top of the original (looks like nothing happened
+  until you move it).
+- **Alt+drag**: an alternative duplicate shortcut — hold **Alt** before
+  dragging with the Move tool to drag out a new copy in one motion
+  (same convention used throughout the environment-building tutorials
+  in this repo).
+- **Multi-select**: hold **Shift** and click to select multiple objects
+  at once; hold **Ctrl** and click a selected object to deselect just
+  that one. With several objects selected, Move/Rotate/Scale apply to
+  the whole group together. **Ctrl+Z** undoes as usual.
 
-*Transcript cuts off here, right after introducing Ctrl+D — likely
-continues into the actual Blueprints programming chapter next.*
+## Chapter 5: Blueprint Programming
+
+1. **What Blueprints are**: Unreal's visual scripting language, an
+   alternative to writing C++ by hand. Instead of hundreds of lines of
+   code, you connect boxes called **nodes** together — logically the
+   exact same thing as code, just a different way to visualize a
+   program. In the creator's opinion, Blueprints are easier and faster
+   than C++ for most projects.
+   - **Should you learn C++ or Blueprints?** For most projects, stick
+     with Blueprints, especially as a beginner — they can do almost
+     everything C++ can. Even if you do end up using C++, you'll still
+     encounter Blueprints constantly, since they're used everywhere
+     throughout Unreal Engine one way or another.
+2. **First look at an existing Blueprint**: open the default **Third
+   Person Character** Blueprint that ships with the Third Person
+   template — Content Browser → Third Person → Blueprints →
+   `BP_ThirdPersonCharacter` → double-click.
+3. The Blueprint Editor window opens hovering over the main level
+   editor — hold left-mouse-button on its tab to dock it, letting you
+   quickly switch between the level editor and any open Blueprint
+   editors (same docking mechanic as the main editor's panels).
+4. **Blueprint Editor UI tour**:
+   - **Event Graph** (middle): where the majority of a Blueprint's
+     actual logic/programming happens.
+   - **Construction Script** (to the left of the Event Graph): not
+     covered in this tutorial — mostly used by artists/technical
+     artists, not core gameplay logic.
+   - **Viewport** (further left): shows every object that makes up this
+     Blueprint. Important terminology: inside a Blueprint, these
+     objects are called **Components** — e.g. the camera and the
+     character mesh are both components of the character Blueprint.
+   - **Components panel**: functionally the Outliner, but scoped to
+     this Blueprint — lists every component it contains. Selecting a
+     component here highlights it in the Viewport and vice versa.
+   - **My Blueprint panel** (below Components): contains every node and
+     variable used anywhere in this Blueprint — e.g. clicking "Event
+     Graph" under its Graphs section jumps straight to that graph.
+5. **Details panel** still works the same way here as in the level
+   editor — select a component (e.g. the character's mesh) to edit its
+   properties, including swapping the mesh entirely (the default
+   Third Person template ships a "female" mesh by default; selecting
+   `SKM_Manny` instead swaps in the male mesh).
+6. **Blueprint Viewport navigation** mirrors the level viewport: hold
+   RMB to look around, press **F** to focus the camera on a selected
+   component, scroll wheel to zoom. Two extras specific to this
+   viewport: **Alt + left-mouse-button** drag rotates the camera around
+   the selected object (combine with scroll to zoom), and holding **L**
+   + left-mouse-button rotates the preview sun, letting you check how
+   the Blueprint looks under different lighting angles.
+7. **Play** works from inside the Blueprint editor too — opens the same
+   playable preview window as the main editor's Play button. **Escape**
+   exits.
+8. **Compile button**: whenever you change a Blueprint (e.g. add a new
+   node to the Event Graph), you need to **Compile** it for the change
+   to take effect — either by clicking the Compile button directly, or
+   simply by pressing **Play**, which automatically compiles every
+   Blueprint the game needs first.
+9. Every panel here is a dockable, tabbed widget — rearrange the
+   Blueprint editor's layout the same way as the main editor (drag tabs
+   to redock), and recover the default arrangement the same way too
+   (**Window → Load Layout → Default Editor Layout**) if it gets messed
+   up.
+
+## Chapter 6: First Person Template
+
+1. Before building the actual first-person shooter, download the
+   tutorial's **custom free assets** (link in the original video's
+   description) — needed to follow along with the rest of the project.
+2. **Create a new project specifically for this game** (the Third
+   Person project used so far was just for demonstrating Blueprints
+   basics): File → New Project (or exit back to the Unreal Project
+   Browser), **Games** category → **First Person** template this time.
+3. **Future-proofing note**: if Epic ever changes or removes the
+   built-in First Person template in a later engine version, start
+   instead from the **"First Person Template"** project bundled inside
+   the tutorial's own downloadable asset package — keeps the rest of
+   the tutorial compatible regardless of Unreal version drift.
+4. Download the tutorial's **"target game assets"** package (description
+   link). **Important**: unzip it before opening — double-click the
+   archive, drag it onto the Desktop (or wherever) to extract.
+5. Once unzipped: close the Unreal Project Browser if it's open. The
+   extracted project folder can be renamed to anything (the creator
+   renames it "my first game"), then open that folder.
+6. **Rename the project itself** (it's still internally named
+   "FirstPersonTemplate" even after the folder rename): right-click the
+   `.uproject` → **Rename**, or select it and press **F2** — rename to
+   e.g. "my first game".
+7. Double-click to open it in Unreal. This bundled template is very
+   similar to Unreal's own built-in First Person template, with one
+   deliberate difference: a gun is **already auto-spawned** when you
+   press Play, specifically to make demonstrating Blueprint basics
+   easier later in the tutorial.
+8. **Quick demo of the template**: press **Play** — **WASD** to walk,
+   **Space** to jump, **left mouse button** fires the built-in weapon
+   (bouncing-ball projectiles). Firing at the included target boxes
+   knocks them away via physics simulation. **Escape** to exit.
+9. **Open the First Person Character Blueprint** to keep learning
+   Blueprint basics: **Ctrl+Space** (Content Drawer) → First Person
+   folder → Blueprints → double-click the character Blueprint.
+10. Its Viewport shows: a **Capsule Collision**, a **Camera**, **Arms**,
+    and a **Weapon** component — in this starter template, the weapon/
+    gun is built directly into the first-person character Blueprint
+    itself (not a separate pickup-able actor).
+11. **Open its Event Graph** to introduce core Blueprint vocabulary
+    before building anything from scratch:
+    - Navigation: hold RMB to pan the graph, scroll wheel to zoom.
+    - Reassurance: "don't worry if this looks complicated — we're going
+      to build our own Blueprint from scratch very soon; this is just
+      open as a reference to see what Blueprints are actually doing
+      behind the scenes."
+    - **Red nodes = Events**. An Event can be linked to other Blueprint
+      logic, or tied directly to actual player input (e.g. a keyboard/
+      mouse button press).
+    - Walked-through example: an Event node that fires **when the
+      player presses the left mouse button** — once triggered, an
+      **executable wire** (the solid white connector line, distinct
+      from the colored data-type wires used elsewhere in a graph) fires
+      out to whatever node(s) it's connected to next.
+
+*Transcript cuts off here, right as the executable-wire concept is
+introduced — likely continues explaining what that fired wire actually
+does (presumably triggering the gun to shoot), then moves into building
+the FPS project's own Blueprints from scratch.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (Blueprints programming, UI, weapons, Chaos physics destruction,
-and adding the finished game to an environment) and this file will be
-updated.*
+video (building custom Blueprints, UI, weapons, Chaos physics
+destruction, and adding the finished game to an environment) and this
+file will be updated.*
