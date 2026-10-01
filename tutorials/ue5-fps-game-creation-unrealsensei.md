@@ -22,14 +22,14 @@ Captured from the video transcript (screenshots, not watched directly)
 Status: **partial capture** — covers the intro, all the foundational
 editor basics (chapters 3-4), Blueprint editor vocabulary (chapter 5),
 node-graph fundamentals, migrating assets (chapter 6-7), a finished
-`BP_Target` with hit detection restricted to actual projectiles via a
-Cast node (chapter 8), a fully working score system (chapter 9), and a
-complete working score UI (chapter 10) — anchors for responsive
-layout, a widget-instance reference stored via Promote to Variable so
-the Game Mode can call a custom event *inside* a specific widget, and
-an Append node formatting the display as "Score N". Win/lose
-conditions, the countdown timer, Chaos physics destruction, and final
-assembly haven't been covered yet.
+`BP_Target` (chapter 8), a fully working score system (chapter 9), a
+complete score UI simplified via custom-event input parameters
+(chapter 10), graph organization tools (chapter 11), dynamically
+counting targets in the world to set `MaxScore` plus a working win
+condition (chapter 12), and the start of a `WBP_EndScreen` widget
+(chapter 13, cut off right as it's created and added to the viewport
+on win). The countdown timer / lose condition, Chaos physics
+destruction, and final environment assembly haven't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -821,10 +821,142 @@ Graph tab, not just the static Designer view):
     - Compile, Save, Play — confirms "Score 1" / "Score 2" / "Score 3"
       now displays correctly as targets are destroyed, completing the
       working score UI.
+21. **Simplifying with Custom Event input parameters**: the widget's
+    `Update Score` event currently does its own `Get Game Mode → Cast
+    To → Get Current Score` chain internally, which is redundant since
+    the Game Mode already has that value when it calls the event.
+    Cleaner approach — **give the custom event an input parameter**:
+    - Select the `Update Score` custom event, in its Details panel find
+      **Inputs**, click **+**, name the new input **"Current Score"**,
+      type **Integer**.
+    - The event node now exposes a `Current Score` input pin directly —
+      use that inside the widget's graph instead of re-fetching the
+      value.
+    - Back in `GM_TargetGame`: the call to `Update Score` now shows a
+      matching `Current Score` input pin — plug the `CurrentScore`
+      variable straight into it when calling.
+    - This removes the need for the widget to know anything about the
+      Game Mode at all — it just receives the value it needs as a
+      parameter. Compile, re-test — confirms it still works, with a
+      simpler graph.
+
+## Chapter 11: Organize Nodes
+
+1. **Bug — score starts at a random/leftover value**: nothing explicitly
+   resets `CurrentScore` to 0 display when the game starts. Fix: call
+   `Update Score` (with `Current Score = 0`) from `Event Begin Play` in
+   the Game Mode too, not just from `Add Score`.
+2. **Graph organization tools** (purely cosmetic, demonstrated while
+   wiring the above):
+   - **Reroute node**: hover over any wire and **double-click** to
+     insert a reroute point, letting you bend the wire's path for
+     readability without changing what it connects.
+   - **Comment boxes**: hover over a group of nodes and press **C** to
+     wrap them in a labeled comment box (e.g. "Add Score by calling the
+     widgets") — helpful for yourself or teammates to understand a
+     graph section at a glance. Individual nodes can also get their own
+     small comment (hover the node, click its comment icon, type text).
+     Comments can be removed the same way they're added.
+3. Save everything. Test: 3 targets in the world, hit 1, 2, 3 — confirms
+   the counter and reset-at-start logic both work correctly.
+
+## Chapter 12: Get Targets
+
+1. **New variable**: `MaxScore` (Integer) in `GM_TargetGame`.
+   `CurrentScore` = how many targets have been hit so far; `MaxScore` =
+   how many targets exist in total / need to be hit to win.
+2. **Counting targets dynamically** (rather than hardcoding a number) —
+   in `Event Begin Play`:
+   - Drag out, type **"Get All Actors of Class"**, specify the class as
+     `BP_Target` — returns a reference to every Target actor currently
+     in the level.
+   - This returns an **array** (shown as a small-squares icon pin) —
+     explicitly flagged as out of scope for this tutorial ("we are not
+     going over arrays in this video"), but conceptually: it's a list
+     holding every Target actor found.
+   - Drag from that array output, type **"Length"** — gives the actual
+     count of targets found.
+   - **Alt+drag** the `MaxScore` variable in to auto-create a **Set**
+     node, and wire the Length output into it — `MaxScore` now reflects
+     the real number of targets placed in the level at game start,
+     rather than a hardcoded number.
+3. **Showing progress as "X/Y"**: add another **Input** parameter to the
+   widget's `Update Score` custom event — **"Max Score"**, Integer.
+   - In the Append logic from Chapter 10, change the formatting to
+     combine `CurrentScore`, a literal `/`, and `MaxScore` — so the
+     display reads e.g. **"0/3"** instead of just a bare number.
+   - Back in `GM_TargetGame`: both the `Add Score` call **and** the
+     `Event Begin Play` call to `Update Score` need to pass `MaxScore`
+     into this new input pin too (Ctrl+drag `MaxScore` in and connect it
+     at both call sites) — otherwise the initial display would show
+     "0/0" instead of "0/3".
+4. Press Play — confirms "0/3" at the start, then "1/3", "2/3", "3/3" as
+   targets are hit.
+
+**Win condition**:
+
+5. After the score-update logic in `Add Score`, add a **Branch** (hold
+   **B** + click, or right-click → "if").
+6. **Comparing CurrentScore to MaxScore**: drag from `CurrentScore`,
+   type `==` (or "equal"), select the integer equality comparison node,
+   plug `MaxScore` into its other input. Wire this Boolean result into
+   the Branch's condition.
+7. If **True** (scores are equal — every target has been hit), that's
+   the win condition. For now, before building a proper end screen,
+   confirm it with a placeholder `Print String`: "Congrats, you won!"
+   with a smiley face, default duration — text color needs setting to
+   something visible against the sky (plain white/default text is easy
+   to lose, same issue as earlier Print Strings in this project).
+
+## Chapter 13: Win Screen
+
+1. **Shortcut**: **Alt+P** plays the game directly — equivalent to
+   clicking the Play button, but faster to trigger repeatedly while
+   testing.
+2. Testing confirms hitting all 3 targets fires the win Print String —
+   but a tiny debug message isn't something an actual player would
+   notice or understand as "the game is over, stop playing."
+3. **Build a proper End Screen widget**, same process as the score UI:
+   Ctrl+Space → right-click → User Interface → Widget Blueprint → name
+   it **`WBP_EndScreen`** — this single widget is planned to handle
+   *both* the win screen and (implied) a lose screen.
+4. Open it: first step for any widget (again) is adding a **Canvas
+   Panel**. Side note from the creator: in Unreal Engine 4 this used to
+   be added automatically by default; in UE5 it must be added manually
+   every time.
+5. Add a **Text** element, place it centered on screen, make it fairly
+   large (**Size 60**, then bumped even larger).
+6. **Justification**: select the middle/center justification option so
+   the text's own internal alignment stays centered (distinct from the
+   Anchor, which positions the whole element on screen — Justification
+   controls alignment *within* the text box itself).
+7. **Drop Shadow polish** (text looked "a little bland" without it):
+   - Find the text's **Shadow Color** property, increase its **Alpha**
+     (transparency) value — default is **0** (fully transparent/
+     invisible shadow); raising it toward **1** makes the shadow fully
+     opaque (black by default).
+   - Adjust **Shadow Offset** to nudge the shadow's position relative to
+     the text for a better-looking effect.
+8. Set placeholder text content — a short celebratory message with a
+   smiley face (exact wording unclear from the transcript's
+   speech-to-text rendering; treated as a placeholder the creator says
+   will be edited again shortly, not final copy).
+9. **Displaying this widget when the player wins**: back in
+   `GM_TargetGame`'s win-condition Branch (True pin) — delete the
+   earlier placeholder `Print String`.
+   - Drag from the Branch's **True** pin, type **"Create Widget"**,
+     select `WBP_EndScreen` as the class. From its **Return Value**,
+     drag out and connect to **"Add to Viewport"**.
+
+*Transcript cuts off here, right as the win-screen widget is being
+created and added to the viewport — likely continues into actually
+pausing/stopping gameplay when the player wins, and building the lose
+condition (the countdown timer) that `WBP_EndScreen` is also meant to
+handle.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (win/lose conditions, the countdown timer, Chaos physics
-destruction, and adding the finished game to an environment) and this
-file will be updated.*
+video (finishing the win screen, the countdown timer and lose
+condition, Chaos physics destruction, and adding the finished game to
+an environment) and this file will be updated.*
