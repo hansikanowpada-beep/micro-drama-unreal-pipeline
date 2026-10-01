@@ -26,12 +26,15 @@ node-graph fundamentals, migrating assets (chapter 6-7), a finished
 complete score UI (chapter 10), graph organization tools (chapter 11),
 dynamic target counting plus a working win condition (chapter 12), a
 complete `WBP_EndScreen` (chapter 13), a fully working countdown timer
-and lose condition refactored into a single `Show End Screen` custom
-event (chapter 14), and the start of a custom `BP_Rifle` weapon
-Blueprint — removed from the character, spawned and attached to the
-`grip_point` socket at game start (chapter 15, cut off right as the
-weapon's own fire logic needs rebuilding). Chaos physics destruction
-and final environment assembly haven't been covered yet.
+and lose condition (chapter 14), and a complete `BP_Rifle` weapon
+Blueprint — spawn/attach, a Fire custom event wired to input via a
+Promote to Variable reference, muzzle-point spawning via an Arrow
+component, recoil animation, sound, and a Niagara muzzle flash
+(chapter 15). Chapter 16 has just started a custom `BP_Bullets`
+projectile (collision, visual mesh, Projectile Movement component),
+cut off right as its speed values are being set. This is the last
+batch sent so far — Chaos physics destruction and final environment
+assembly haven't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -1263,17 +1266,136 @@ Graph tab, not just the static Designer view):
    rewrite.
 10. **New problem**: firing (left mouse button) no longer does anything,
     since all the original firing logic was deleted from the character
-    Blueprint back in step 3 — it needs to be rebuilt, presumably
-    inside `BP_Rifle` itself this time rather than the character.
+    Blueprint back in step 3 — it needs to be rebuilt, this time inside
+    `BP_Rifle` itself rather than the character.
+11. **Cleanup fixes on the rifle mesh**:
+    - **Unwanted shadow on the ground**: select `BP_Rifle`'s Static
+      Mesh component → Details → disable **Cast Shadow**.
+    - **Weapon blocking the player against walls**: the mesh still has
+      Collision enabled by default, so the gun can physically bump
+      into world geometry. Select the Static Mesh component → scroll
+      to **Collision** → set to **No Collision**.
+    - Delete unused default events left in `BP_Rifle`'s Event Graph.
+12. **Create the Fire custom event** in `BP_Rifle`: right-click →
+    Custom Events → **"Fire"**.
+13. **Calling it from input**: back in `BP_FirstPersonCharacter`'s
+    existing **Left Mouse Button** input event — need a reference to
+    the *specific* spawned rifle instance to call `Fire` on it.
+    - **Getting that reference**: back where `Spawn Actor from Class
+      (BP_Rifle)` runs (from step 7 earlier in this chapter),
+      right-click its **Return Value** output pin → **"Promote to
+      Variable"** → name it **`Rifle`** (same technique as the
+      `WBP_UI` widget reference from Chapter 10 — the spawned instance
+      gets automatically stored the moment it's created).
+    - Ctrl+drag `Rifle` into the graph at the Left Mouse Button event
+      as **Get**, drag from it, type **"Fire"** — calls the custom
+      event on that specific rifle instance.
+    - Verified with a temporary debug `Print String` inside `Fire`:
+      pressing the mouse button prints the message, confirming the
+      call chain works before building the real logic.
+14. **Spawning the actual projectile** (inside `BP_Rifle`'s `Fire`
+    event): delete the debug print, drag from `Fire`, add **"Spawn
+    Actor from Class"**, targeting the (not-yet-built) projectile
+    Blueprint.
+15. **Marking the muzzle spawn point**: a bullet needs to spawn from an
+    exact position and direction (the gun's muzzle), so add an
+    **Arrow** component — a directional marker that's invisible to the
+    player at runtime, purely an editor/logic helper.
+    - Enable rotation snapping, rotate it exactly **90°**.
+    - Position it at the very front/muzzle of the rifle mesh.
+    - Decrease its display size (visual only, no gameplay effect).
+    - In the graph: `Get Arrow` → **"Get World Transform"** → plug into
+      the Spawn Actor's spawn transform — the projectile now spawns
+      exactly at the arrow's position/rotation.
+16. Play — confirms a projectile spawns correctly from the muzzle, but
+    "there's no impact, it's just flying out" — motivating the
+    animation/sound/VFX polish below.
+17. **Weapon recoil animation**: play an animation on the player's Arms
+    right after firing.
+    - `Get Player Character` → `Cast To BP_FirstPersonCharacter` → get
+      its **Arms** component → from Arms, `Get Anim Instance` (required
+      to play animations) → `Play Montage` (a Montage is a type of
+      animation clip/sequence).
+    - Select the built-in **`FP_Rifle_Shoot_Montage`** that ships with
+      Unreal's default First Person template content.
+    - Play — confirms the weapon now visibly recoils on each shot.
+18. **Two more polish nodes off `Fire`** — sound and a particle effect
+    ("every time I fire there'll be a little bit of smoke and a muzzle
+    flash"):
+    - **Sound**: `Play Sound at Location`, Location = `Get Actor
+      Location` on the rifle itself, Sound = the included
+      **"Weapon Rifle Punch"** asset.
+    - **Muzzle flash**: `Spawn System Attached` (a Niagara system
+      spawned attached to a specific component, rather than floating
+      freely in world space) — System = a muzzle-flash Niagara system
+      bundled in the downloaded custom assets (Sci-Fi Weapons →
+      Effects → Muzzle Flash, internal name along the lines of
+      `P_Muzzle_Flash`). Attach Component = the **Arrow** (so the flash
+      appears exactly at the muzzle), other inputs left at default.
+    - Play — confirms a visible flash on each shot, bright enough to
+      actually affect the scene's **Lumen** lighting, briefly lighting
+      up nearby surfaces.
+19. **Chapter 15 recap** (creator's own words): the original firing
+    logic that used to live inside the character got turned into its
+    own `BP_Rifle` Blueprint — this is what makes switching between
+    multiple weapons possible later, since the firing/animation/sound/
+    VFX logic now lives per-weapon instead of hardcoded into the
+    character. In the graph: pressing Fire gets the player's Arms and
+    plays a recoil animation on them, spawns the projectile, plays a
+    sound at the rifle's location, and spawns a small muzzle-flash
+    particle effect.
+    - Explicit point about **game feel**: technically `Fire` could have
+      been just one node (spawning the projectile) — none of the
+      animation/sound/particle nodes are strictly necessary for the
+      game to function. But without them the gun felt "stiff" and
+      unsatisfying to fire. These add no new gameplay mechanics, yet
+      this kind of polish/"juice" is what makes an action feel fun
+      and, in the creator's words, "a little bit addicting."
 
-*Transcript cuts off here, right as this firing-logic gap is raised
-("that is pretty obviously if I press the left mouse button we don't
-fire the weapon, also if I...") — likely continues into building the
-weapon's own fire logic from scratch inside `BP_Rifle`.*
+## Chapter 16: Projectile (partial — cut off mid-setup)
+
+1. **Motivation**: the current projectile (Unreal's stock "First Person
+   Projectile," a bouncing ball) "doesn't feel like a bullet." Goal:
+   build a more realistic projectile — a fast-moving tracer that
+   completely disappears after a set time (e.g. 5 seconds) instead of
+   bouncing around the level.
+2. **Create the new projectile Blueprint**: Ctrl+Space → Blueprints
+   folder → right-click → **Blueprint Class** → **Actor** (needs to
+   exist and move through world space) → name it **`BP_Bullets`**.
+3. **Add a Collision component first**: **+ Add** → type "Collision" →
+   add a collision-shape component — this is what will let the bullet
+   actually detect hitting something (e.g. a Target), same role as the
+   collision used in the stock projectile back in Chapter 8.
+   - Set its size very small — **2** — since this represents a thin
+     bullet, not a large sphere.
+4. Delete the Blueprint's default Scene Root once Collision exists:
+   drag the Scene Root onto the Collision component to re-parent
+   anything under it, then delete the now-empty default root.
+5. **Add a visual shape**: **+ Add** → Basic Shape → **Sphere** — this
+   becomes the bullet's visible mesh.
+   - **Troubleshooting — visual doesn't track the collision**:
+     temporarily swapping `BP_Rifle`'s spawned projectile class from the
+     old stock projectile to this new `BP_Bullets` confirms it does
+     spawn, but the Sphere visual floats independently rather than
+     looking like a realistic bullet, and the scale is far too large.
+   - **Fix — scale it down**: select the Sphere, set **Scale** to
+     **X=0.1, Y=0.1, Z=0.1** for a much smaller, more bullet-like size.
+6. **Add actual movement**: **+ Add** → type "projectile" → add a
+   **Projectile Movement** component — this is what will actually
+   propel the bullet forward through the world (the Collision component
+   alone only detects hits, it doesn't move the actor). It asks for an
+   **Initial Speed** and a **Max Speed** value.
+
+*Transcript cuts off here, right as the Projectile Movement component's
+speed values are about to be set ("if we put in...") — likely continues
+tuning bullet speed, setting up the tracer's lifespan/auto-destroy
+timer, and wiring its own hit-detection logic (presumably replacing the
+Cast-To-Projectile check in `BP_Target` with a check against this new
+`BP_Bullets` class).*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (building the weapon's fire logic, Chaos physics destruction, and
-adding the finished game to an environment) and this file will be
-updated.*
+video (finishing the bullet tracer, updating `BP_Target`'s hit check for
+the new projectile class, Chaos physics destruction, and adding the
+finished game to an environment) and this file will be updated.*
