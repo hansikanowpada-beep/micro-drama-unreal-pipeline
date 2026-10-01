@@ -13,9 +13,10 @@ one is specifically about building a custom road/ground surface using a
 multi-layer blend material system, not character animation or Sequencer
 work. Kept as its own file per the note at the end of the other one.
 
-Status: **partial capture** — covers through placing street lamps with
-a pivot-point fix (chapter 12, cut off mid-sentence). More to be added
-as further transcript/screenshots are shared.
+Status: **partial capture** — covers through character animation
+(retargeting a walk cycle) and most of a final anamorphic-style camera
+lens pass (chapter 13, cut off mid-sentence). More to be added as
+further transcript/screenshots are shared.
 
 ## Chapter 1: Introduction
 
@@ -561,14 +562,119 @@ slots plus vertex-color mesh painting to control where each shows.
    variants not wanted here, keep just one selected, decrease brush size
    to **50** (much smaller than the building/ground passes — appropriate
    for a thin pole), paint ivy climbing up the post.
-7. Duplicate the finished lamp post multiple times along the road.
+7. Duplicate the finished lamp post multiple times along the road,
+   including the opposite side. Reposition/scale down stray rubble
+   pieces nearby as needed.
+8. **Ferns and small plants** (described as "fun assets" in the
+   transcript — read as "fern assets"): Mega Scans folder, enable the
+   Static Mesh filter, find small plant meshes.
+   - Foliage tool: deselect the ivy variants, select only the fern
+     mesh(es), decrease **Density** to **50**, paint them around the
+     scene.
+   - Scale individual ferns down (tutorial sets **0.5**) so they read as
+     small ground plants rather than oversized foliage.
+9. **Electric lines** — a separate free asset (link given in the
+   original video's description):
+   - Download the zip, extract it.
+   - Copy the extracted folder into your project: Content Drawer →
+     right-click Content folder → **Show in Explorer** → paste the
+     folder in.
+   - Back in the project's Content Browser, find the pasted folder →
+     **Line Tools** subfolder → an **"electric post line"** asset.
+   - Place a pole, rotate it, duplicate it to create a second pole.
+   - **Connecting the wires between poles**: select one pole, activate
+     its **Pickup Tool**, then click on the other pole — this draws/
+     connects a wire spanning between the two. Repeat the duplicate +
+     pickup-tool-connect pattern to chain further poles together.
+10. **More scatter assets from Fab**:
+    - A pack described as **"Junkyard"** (transcript renders the source
+      as "Quicksell Megascan," almost certainly **Quixel Megascans** —
+      treat as approximate). After download: Assets folder → Blueprint
+      subfolder → use a **"pile of tires"** blueprint, place and
+      duplicate it around the scene.
+    - **"Industry Props Pack 6"** — another Fab pack, Add to Project;
+      after download, enable the Static Mesh filter, use its paper/
+      trash-litter assets scattered around for grime/detail.
 
-*Transcript cuts off mid-sentence here ("...we place it here and we
-duplicate it over here.") — likely continues placing more lamp posts
-and finishing final detailing.*
+## Chapter 13: Character and camera animation
+
+1. **Adding a character**: download an **"Adventure Characters"** pack
+   from Fab, Add to Project.
+   - After download: go to its Mesh folder, use the second character
+     mesh (double-click to open it), navigate into its UE5/Full
+     subfolder to find the actual character assets.
+   - Drag the character into the scene, reposition the Directional Light
+     (**Ctrl+L**) if needed to see it clearly.
+2. **Basic animation setup** (Sequencer):
+   - Select the character → Sequencer → **Add → Add Actor Track** →
+     select the character.
+   - **Animation** tab → **+** → add an **Idle** animation clip, extend
+     its length to cover the shot.
+3. **Adding a walk animation** (the character pack's own idle doesn't
+   include a locomotion clip, so a separate pack is needed):
+   - Download the free **Mocap Online** animation pack from Fab, Add to
+     Project.
+   - Browse to **Animations → Walk → In Place**, and pick a clip (the
+     tutorial uses one called **"Walk and Look Around"**).
+   - **This clip isn't natively compatible with the character's
+     skeleton** — it needs to be **retargeted**:
+     - Right-click the animation → **Retarget Animation**.
+     - In the target slot, select your character asset (locate it via
+       the Details panel's magnifying-glass **browse-to** button).
+     - This opens a retarget interface — select the specific clip to
+       retarget.
+     - **Important**: the default retargeted result is a **root-motion**
+       animation (it would move the character itself through space),
+       but what's wanted here is the **in-place** variant (matching the
+       approach used in the other tutorial — world-space movement comes
+       from keyframing Transform directly, not from the clip). Select
+       the in-place version instead.
+     - Click **Export Animations**, choose your character's own asset
+       folder (e.g. "Adventures") as the destination, **Export** — this
+       produces a new animation asset compatible with this specific
+       character's skeleton.
+   - Back in Sequencer: delete the old Idle clip, add the newly exported
+     retargeted walk animation via the **+** button (scroll to find it
+     in the list) in its place.
+4. **Animating the character's movement** (world-space Transform,
+   same underlying concept as the Sequencer character-movement
+   technique in the companion cinematics tutorial, with this video's own
+   exact click order):
+   - Go to the very first frame of the sequence.
+   - Select the character's **Transform** track, create a keyframe.
+   - Set this keyframe's **interpolation** to **Linear**.
+   - Go to the last frame.
+   - Enable **Auto Keyframe**, then simply move the character to its new
+     end position — Auto Keyframe captures the second keyframe
+     automatically since it's now toggled on.
+   - Check the result and fine-tune distance/positioning to taste.
+5. **A few final touches**:
+   - **Trees**: Assembly folder (enable Blueprint Class filter), find a
+     tree blueprint asset, scatter a few trees around the scene for
+     extra variety.
+   - **Camera lens refinement** (Cine Camera's Camera Component, via
+     Sequencer):
+     - Increase **Squeeze Factor** to its maximum (an anamorphic-lens
+       simulation setting).
+     - **Sensor Width**: halve the value (type `/2` directly into the
+       field) — paired with the Squeeze Factor change for correct
+       anamorphic-style framing.
+     - **Focus**: use the **Pickup Tool** and click directly on the
+       character in the viewport to automatically set the camera's
+       focus distance to that point.
+     - **Bloom**: enable it, change the method to **Convolution**,
+       adjust **Intensity** to taste (lower intensity reads as a more
+       subtle sun in frame; higher is more pronounced).
+     - **Chromatic Aberration**: enabled next, with value adjustment cut
+       off by the transcript.
+
+*Transcript cuts off mid-sentence here ("...we go to this chromatic
+aberration and we enable this chromatic aberration and put the...") —
+likely continues tuning the Chromatic Aberration intensity, and possibly
+moves into final rendering/export after that.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing final detailing, any further lighting, or final
-export/rendering) and this file will be updated.*
+video (finishing camera lens tuning, and the final rendering/export
+step) and this file will be updated.*
