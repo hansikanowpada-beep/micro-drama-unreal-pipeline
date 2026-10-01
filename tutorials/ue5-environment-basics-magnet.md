@@ -5,9 +5,10 @@ video transcript (shared as screenshots, not watched directly — so exact
 button positions/labels should be double-checked against the live video,
 but the sequence of operations below is accurate to the transcript).
 
-Status: **partial capture** — covers through the start of keyframing
-character movement in Sequencer (chapter 13, cut off mid-explanation).
-More chapters to be added as further transcript/screenshots are shared.
+Status: **complete capture** — covers the full video, start to finish:
+asset sourcing through environment building, set dressing, cinematic
+camera, character/Sequencer animation, camera shake, and Movie Render
+Queue export.
 
 ## Chapter 1: Introduction
 
@@ -277,7 +278,7 @@ imported ground-surface model to position it):
      the character actually travel along the ground requires separately
      animating its **Transform** (position) over time — see Chapter 13.
 
-## Chapter 13: Animating character movement (partial — transcript cuts off here)
+## Chapter 13: Animating character movement
 
 1. Switch the main editor viewport back to free **Viewport** navigation
    (un-pilot the Sequencer camera) so you can move around independently
@@ -295,18 +296,209 @@ imported ground-surface model to position it):
 6. Move the Sequencer playhead to the very start of the timeline
    (frame 0).
 7. Add a keyframe on the character's **Transform** (location) at this
-   starting position — this is the mechanism for animating movement:
-   keyframe the start position at frame 0, then later move the playhead
-   forward in time and keyframe a new (moved) position; Sequencer
-   interpolates the character smoothly between the two, producing
-   actual on-screen movement to go with the in-place run/walk cycle.
+   starting position:
+   - Keyframing the parent **Transform** track keys rotation + all
+     location axes together in one keyframe.
+   - To keyframe just one component (e.g. only rotation), expand
+     Transform into its sub-tracks and key that sub-track individually.
+   - **Auto Keyframe** (a toggle in the Sequencer toolbar) automatically
+     creates a keyframe any time you move/rotate the actor, so you don't
+     have to manually click "add key" every time — handy once you're
+     doing a lot of these.
+   - **Keyframe interpolation**: new keyframes default to an eased
+     (non-linear) curve. For constant-speed movement, right-click a
+     keyframe → set it to **Linear**; you can also set Linear as the new
+     default interpolation so later keyframes are created linear
+     automatically.
+8. Move the playhead to the end of the shot and reposition the character
+   to its ending location — this creates the second keyframe (manually,
+   or automatically if Auto Keyframe is on) and Sequencer interpolates
+   the character's movement between the two positions.
+9. **Troubleshooting — character runs backward**: if the character moves
+   in the wrong direction relative to its facing, select it and use
+   **E** (rotate) to correct its orientation, then re-check.
+   - Tip: selecting the **Sky** actor in the Outliner clears the
+     yellow/orange selection-outline highlight from other objects,
+     making it easier to visually judge the character's motion without
+     a distracting outline in the way.
+10. Play back the animation to check it — movement looks right
+    directionally, but may still look too slow, and the character's
+    **feet may not actually contact the ground correctly** (foot
+    sliding) — addressed next in Chapter 14.
 
-*The transcript ends here mid-explanation of the second keyframe — next
-batch should pick up with keyframing the end position and likely
-rendering/exporting the final shot via Movie Render Queue.*
+## Chapter 14: Correcting foot placement (fixing foot sliding)
+
+1. First-pass fix: go to the start of the clip, press **W** (move) and
+   nudge the character's start position slightly to better align the
+   stride length with the distance it needs to cover — zoom in and
+   check visually whether the feet now roughly match ground contact.
+2. Even after that, the character won't perfectly track **uneven ground
+   / surface contours** — the real fix is manual, frame-by-frame
+   keyframing:
+   - Go to the start of the sequence, close to the character.
+   - This is explicitly called out as **time-consuming**: step through
+     frames one at a time and re-keyframe the character's position each
+     time a foot should contact the ground, so it precisely matches the
+     surface.
+   - Select the character, press **W** (move gizmo).
+   - Use the Sequencer transport's **next-frame** button to step forward
+     one frame at a time.
+   - At each frame where a foot visibly touches the ground, nudge the
+     character's position to match the surface and create a keyframe.
+   - If the default keyframe snapping isn't precise enough, go to the
+     Sequencer's **Snapping** settings and set the snap interval to
+     **1** (frame-accurate).
+   - Repeat through the whole clip. Tedious, but produces noticeably
+     more natural movement that respects the ground's actual shape
+     (the tutorial demonstrates the technique rather than doing the
+     full pass on camera, since it's repetitive).
+
+## Chapter 15: Camera animation and focus
+
+1. Switch focus to the **Camera** (rather than the character) to animate
+   it following the action.
+2. Select the camera, expand its **Transform**, create a starting
+   keyframe (frame 0).
+3. Move the playhead to a point closer to the character and reposition
+   the camera (push in) — note the framing is now too wide.
+4. Fix framing via the **Camera Component** settings (not the actor
+   Transform) — adjust **Focal Length**.
+   - Gotcha: changing Focal Length may appear to do nothing at first —
+     that's because the camera's **Lens Type** is still set to a fixed
+     **Prime** lens (the 12mm from Chapter 10), which by design has one
+     unchangeable focal length.
+   - Fix: change Lens Type to a **Zoom/Universal Zoom** lens, which
+     unlocks the Focal Length slider. Tutorial sets it to **45mm**.
+5. After zooming in, the character falls out of focus (depth-of-field
+   blur) — fix by adjusting **Focus Distance** until the character is
+   sharp again.
+6. **Bokeh/depth-of-field control**: lowering the camera's **Aperture**
+   (f-stop) value produces a stronger background-blur (bokeh) effect —
+   tutorial sets it very low (~1) for a pronounced shallow-depth look.
+7. Animate the camera over time: with the starting keyframe already set,
+   move the playhead to the end of the shot and reposition the camera —
+   with **Auto Keyframe** on, this automatically creates the matching
+   end keyframe.
+8. Keyframe the character's start/end position the same way, using
+   **Linear** interpolation (set as default earlier) so camera and
+   character motion read consistently rather than floaty/eased.
+   - Tutorial notes the resulting camera motion now looks "a little too
+     linear" / mechanical — motivating the camera shake added next.
+9. Playback can look laggy while editing in the viewport — this is just
+   real-time viewport + screen-recording overhead, not a problem with
+   the actual render output.
+10. Reinforces the Chapter 13/14 point: animating the character's
+    Transform over time is also what makes it track the ground
+    surface's contours correctly — it's not automatic from the
+    animation clip alone.
+
+## Chapter 16: Adding camera shake (custom Camera Shake Blueprint)
+
+A fully custom camera-shake effect, built from scratch as a Blueprint:
+
+1. In the Content Drawer, right-click → **Blueprint Class**.
+2. Search the parent-class picker for **Camera Shake** and select it as
+   the base class.
+3. Name it (e.g. `CameraShake`) — **do not use a space in the name**,
+   use an underscore instead if needed; spaces aren't supported here.
+4. Double-click to open it. Minor editor quirk noted in the tutorial:
+   you may need to close and reopen it once after creation for it to
+   fully register/update.
+5. Inside the blueprint, expand the **Camera Shake Pattern** / root
+   shake-pattern category.
+6. Set the pattern type to **Perlin Noise Camera Shake Pattern**.
+7. Under **Timing**, set **Duration** to **0** — this makes the shake
+   run continuously/looping rather than for a fixed length.
+8. **Compile** and close the blueprint.
+9. Back in the Level Sequence: select the **Camera** track, add a
+   **Camera Shake** track (Track/+ button → Camera Shake), and assign
+   your new Camera Shake blueprint to it.
+10. Extend this track to cover whichever portion of the timeline should
+    have the shake active.
+11. If no visible shake appears yet, it's because the pattern's
+    amplitude/frequency are still at (near-zero) defaults — reopen the
+    Camera Shake blueprint and, under the Perlin Noise pattern's
+    **Rotation** (Pitch/Yaw/Roll) settings:
+    - Set **Rotation Amplitude Multiplier** (e.g. 2).
+    - Set **Frequency** (e.g. 1, bumped to 2 for a more noticeable
+      effect).
+12. Recompile, return to Sequencer — the shake is now visible: a subtle,
+    organic handheld-camera jitter, most noticeable when the camera is
+    moving fast (reads as a natural "camera jerk"/micro-shake rather
+    than a shaky-cam gimmick).
+13. The same approach can be reused (additional Camera Shake tracks)
+    for other camera moves elsewhere in the scene.
+
+## Chapter 17: Refining camera and focus (final pass)
+
+1. For a separate/additional camera movement, this time **uncheck Auto
+   Keyframe** on the camera (manual control instead, for precision).
+2. Delete and redo any problematic auto-created keyframes as needed
+   (select a keyframe → delete, then re-add the correct one).
+3. Adjust **Focal Length** (Camera Component) again to properly reframe
+   the character.
+4. Reposition the camera and set the correct **Focus Distance** so the
+   character is sharp again at this point in the timeline.
+5. Keyframe this framed/in-focus state.
+6. To build a continuous camera-follow path: keyframe at one time, move
+   forward in the timeline, reposition the camera to track the
+   character's new location, and keyframe again — repeat to build up a
+   smooth follow.
+   - **Common mistake called out explicitly**: if you keyframe the
+     camera's position at a given time but don't also re-keyframe the
+     **character's** position (or vice versa) at that same time, one of
+     them visually "floats" out of place relative to the other. Fix:
+     keep camera Transform, character Transform, **and** Focus Distance
+     keyframed together at each key moment — Focus Distance needs its
+     own update too, since the correct focus value changes as the
+     camera-to-character distance changes.
+7. End result: camera movement, focus/depth-of-field, and character
+   tracking all working together — character stays framed and in focus
+   throughout. This is effectively the finished shot, ready for export.
+8. Tutorial's framing of why this matters: a moving ("camera stick")
+   shot versus a static locked-off one is what gives the whole scene a
+   sense of life.
+
+## Chapter 18: Rendering and export (Movie Render Queue)
+
+1. For high-quality output with proper anti-aliasing, enable a plugin
+   first: **Edit → Plugins**, search "Movie", enable **Movie Render
+   Queue** (and the additional-render-passes plugin suggested alongside
+   it).
+2. This requires an editor restart — **save your project first**, then
+   restart.
+3. After restarting: **Windows → Cinematics → Movie Render Queue**.
+4. In the Movie Render Queue panel:
+   - Click **Render** (or **+ Render**) and select your Level Sequence
+     as the job.
+   - Open the job's settings/config.
+   - Default output is a **JPEG** image sequence — remove that and add
+     **PNG Sequence [8bit]** instead, for lossless frames.
+   - Under **Anti-Aliasing**: set the sample count — tutorial uses
+     **32** (good quality/speed balance; 64 looks even cleaner but
+     renders slower).
+   - Check **Overwrite** (existing files) so re-renders don't fail.
+   - Set **Anti-Aliasing Method** to **MSAA**.
+   - Under **Output**: set the output path/directory.
+   - Set a custom **Output Frame Rate** matching your sequence —
+     tutorial uses **23.976** (or pick e.g. 60fps if your project target
+     is different).
+   - Set **Resolution** — tutorial uses **1080p** (4K is an option, at a
+     render-time cost).
+5. Click **Accept** to confirm the job config, then **Render** to start.
+6. Output is a **PNG image sequence**, not a finished video file.
+7. **Final step — compositing**: import the PNG sequence into a video
+   editor/compositor (the tutorial uses **Adobe After Effects**) to
+   assemble it into the final video file (this is outside Unreal — add
+   music, color grade, export to mp4, etc. there).
 
 ---
 
-*To extend: send more transcript/screenshots from later chapters of this
-video (finishing the movement keyframes, lighting polish, rendering/
-export) and this file will be updated to cover the full workflow.*
+**This completes the full tutorial workflow** captured from this video:
+free asset sourcing → base environment (lighting/sky/fog) → landscape →
+set dressing/foliage → cinematic camera → character import → Sequencer
+animation (locomotion + manual foot-placement correction) → camera
+animation/focus pulls → custom camera shake → Movie Render Queue export.
+
+*To extend: if a different tutorial or additional techniques get added
+later, start a new file rather than appending unrelated content here.*
