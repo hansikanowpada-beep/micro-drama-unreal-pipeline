@@ -13,10 +13,9 @@ one is specifically about building a custom road/ground surface using a
 multi-layer blend material system, not character animation or Sequencer
 work. Kept as its own file per the note at the end of the other one.
 
-Status: **partial capture** — covers through placing ruined buildings
-and the start of a cross-project asset migration for ivy/plants
-(chapter 6, cut off mid-sentence). More to be added as further
-transcript/screenshots are shared.
+Status: **partial capture** — covers through building a debris pile
+near ruined buildings (chapter 8, cut off mid-sentence). More to be
+added as further transcript/screenshots are shared.
 
 ## Chapter 1: Introduction
 
@@ -283,13 +282,112 @@ slots plus vertex-color mesh painting to control where each shows.
    return to the **Assembly** folder, re-enable the **Blueprint Class**
    filter to find additional blueprint assets (root-system props) from
    the same migrated pack, to place around/under the building.
+   - Place a root asset, increase its scale, then **Alt+drag duplicate**
+     it randomly around the building a few times for natural variation.
+10. Some pack assets are large, complex prefabs (lots of sub-meshes at
+    once) — if one includes unwanted pieces (e.g. rocks, tree trunks,
+    extra plants you don't want), **edit it directly**:
+    - Select the asset → **Edit Blueprint** (double-click or the
+      Details-panel button) → opens the Blueprint's Viewport tab.
+    - Select and delete the unwanted sub-assets inside it (the tutorial
+      removes rocks, trunks, and some plants, keeping just one piece).
+    - **Compile**, close the blueprint — the placed instance in your
+      level now reflects the trimmed-down version.
+    - Reposition/rotate (90°) and place it, then Alt+drag-duplicate it
+      multiple times to build up the design around the building.
+11. **Re-material the building**: disable the Blueprint Class filter,
+    go to the Fab-downloaded **Mega Scans → Surfaces** folder, apply the
+    same **Mossy Concrete** material onto the building(s) by dragging it
+    on — ties the building visually to the rest of the scene's materials.
+12. **Package the whole set as a reusable Level Instance** — this is the
+    key technique for not having to redo all the ivy/root/rubble
+    dressing for every building:
+    - Select the building together with its Foliage system: hold
+      **Shift** and click the Foliage System entry in the Outliner to
+      add it to the selection.
+    - To select every related asset at once: in the **Outliner**, widen/
+      expand the relevant area (drag its panel larger from the bottom),
+      then **Ctrl+click** each individual asset to multi-select them all
+      together (building, ivy foliage, roots, etc.).
+    - With everything selected, right-click → **Level → Create Level
+      Instance**, confirm.
+    - Choose where to save it: create a new folder (e.g. **Levels**),
+      and inside it a file for this specific building (e.g.
+      **"BuildingOne"**).
+    - The result is a single **Level Instance** asset in your Content
+      Browser's Levels folder — dragging it into the scene drops in an
+      exact copy of the whole dressed building (mesh + ivy + roots)
+      in one step, instead of rebuilding the whole stack from scratch
+      each time.
 
-*Transcript cuts off mid-sentence here ("...so maybe we come over here
-and we...") — likely continues into actually placing the root-system
-blueprints.*
+## Chapter 7: Scene assembly
+
+1. For visual variety, build a few more **distinct** buildings (not just
+   copies of the first) using the same full process from Chapter 6: pick
+   a different building mesh from the Ruined Modern Buildings folder,
+   foliage-paint ivy onto it, add roots/rubble, re-material it, then
+   package it as its own Level Instance (e.g. saved as **"Building 2"**
+   in the same Levels folder). Repeat for additional unique buildings —
+   the tutorial ends up with **8 unique building Level Instances** built
+   this way.
+2. **Before** mass-duplicating buildings to fill the whole area, set up
+   the main overview camera and a Level Sequence, so later framing can
+   be checked against the actual laid-out scene:
+   - Place Actors panel → **Cinematics** → **Cine Camera Actor**.
+   - Sequencer tab → **Create Level Sequence**, name it (e.g. "tutorial
+     sequence"), save.
+   - Find the camera in the **Outliner**, drag it into the sequence.
+   - Reposition the camera, then adjust:
+     - **Focal Length**: decreased to **15** for a wide view covering
+       the whole scene.
+     - **Camera Component → Film Back**: preset changed to **16:9
+       DSLR**.
+     - **Exposure**: search "exposure" in the Details panel, find
+       **Metering Mode** (under the Exposure group) and set it to
+       **Manual**; increase **Exposure Compensation** (tutorial sets
+       **10**) for a brighter overview shot.
+     - Nudge the Directional Light position again (**Ctrl+L**) to taste.
+     - Select the **Skylight** (via Outliner search), find **Intensity
+       Scale**, increase it (tutorial sets **5**) for more ambient
+       fill light across the whole scene.
+     - Increase the camera's **Aperture** slightly as a baseline setting
+       for this wide establishing shot.
+3. **Fill out the scene** using the handful of unique Level Instance
+   buildings: select one, **Alt+drag duplicate**, reposition and rotate
+   each copy so repeated buildings don't look identical/uniformly
+   aligned — repeat across the whole area, mixing which of the 8 unique
+   buildings gets reused where.
+
+## Chapter 8: Environmental debris (partial — cuts off mid-sentence)
+
+1. **Rubble/debris props**: Content Browser → Ruined Modern Buildings
+   folder → enable the **Static Mesh** filter → find rubble/debris
+   meshes (shipped alongside the building meshes).
+   - Place a rubble piece, press **R** (scale) and scale it down.
+   - Re-material it to match: disable the Static Mesh filter, go back to
+     **Fab folder → Mega Scans → Surfaces**, apply the same **Mossy**
+     material used on the buildings, for visual consistency.
+2. Pull additional rubble variety from the other building Level
+   Instances already built: open one, enable the Static Mesh filter,
+   pick another rubble piece from inside it, rotate and duplicate it out
+   in the main scene.
+3. Scale some rubble pieces down very small so they read as fine,
+   scattered debris/"small particles" rather than large chunks.
+4. Also bring in pieces from the separate **free "broken buildings"**
+   pack downloaded earlier (Chapter 6) — scale down slightly, duplicate
+   multiple times to scatter around.
+5. **Building debris piles**: duplicate a building piece to reuse as
+   rubble, rotate it to a broken-looking angle, duplicate again at a
+   different rotation, and keep stacking/duplicating pieces near the
+   base of buildings to build up a convincing debris pile, scaling
+   individual pieces down as needed for the smaller fragments.
+
+*Transcript cuts off mid-sentence here ("...so we can use this one. And
+then we're going to decrease its scale. So...") — likely continues the
+debris-piling process.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the building/ivy/roots set dressing, any further
-lighting or export) and this file will be updated.*
+video (finishing environmental debris, any further lighting, or final
+export) and this file will be updated.*
