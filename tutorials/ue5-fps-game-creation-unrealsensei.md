@@ -20,14 +20,13 @@ Captured from the video transcript (screenshots, not watched directly)
 — double-check exact button labels against the live video.
 
 Status: **partial capture** — covers the intro, all the foundational
-editor basics (chapters 3-4, skippable for experienced users per the
-creator), an introduction to Blueprint editor vocabulary using the
-existing Third Person character (chapter 5), and the start of the
-actual FPS project — downloading the tutorial's asset pack, creating
-the First Person template project, and a first look at Events/
-executable wires in the bundled First Person Character Blueprint
-(chapter 6, cut off). Building custom Blueprints from scratch for this
-specific game hasn't started yet.
+editor basics (chapters 3-4), an introduction to Blueprint editor
+vocabulary (chapter 5), node-graph fundamentals including a live
+"Hello World" demo, migrating the game's weapon/target assets from a
+separate downloadable project, and the start of the first custom
+Blueprint (`BP_Target`, an Actor-class Blueprint) — cut off right as
+the target mesh is about to be added to it (chapter 8). The actual
+shooting/scoring/UI/physics logic for the game hasn't started yet.
 
 ## Chapter 1: Intro
 
@@ -362,15 +361,151 @@ with Unreal.
       **executable wire** (the solid white connector line, distinct
       from the colored data-type wires used elsewhere in a graph) fires
       out to whatever node(s) it's connected to next.
+12. **Reading the fire-weapon logic as a worked example**: when
+    triggered, Unreal executes every connected node **in order**. For
+    the left-mouse-button fire event: first an animation plays, then a
+    **projectile bullet** is spawned (visualized as a yellow sphere),
+    then a sound effect plays at that spawn location — all three nodes
+    together make up the complete "fire" logic. A separate example
+    nearby: a **Jump** action is bound to the Space Bar — pressing it
+    makes the player jump, releasing it stops the jump.
+13. **Watching nodes execute live** (debugging technique): move the
+    Details panel aside for more graph space, then press **Play** —
+    this opens a small standalone game window. Once you click into that
+    window the editor loses mouse access; press **Shift+F1** to get the
+    mouse cursor back without closing the game window. Resize/reposition
+    that small game window (e.g. shrink it to the top-right corner) so
+    both it and the Blueprint graph are visible at once.
+    - To watch a *specific* Blueprint's nodes fire in real time: find
+      the **"No Debug Object Selected"** dropdown (top of the Blueprint
+      editor) and select the actual First Person Character instance —
+      now walking around and pressing Space/firing in the live game
+      window visibly lights up the corresponding nodes in the graph.
+    - The **executable wire turns orange** while/after its event fires,
+      confirming exactly which nodes just ran — described as one of
+      Blueprints' biggest strengths: you can literally watch your
+      game's logic execute in real time, which is a huge help when
+      debugging.
 
-*Transcript cuts off here, right as the executable-wire concept is
-introduced — likely continues explaining what that fired wire actually
-does (presumably triggering the gun to shoot), then moves into building
-the FPS project's own Blueprints from scratch.*
+## Chapter 6 (continued): Building your first node graph
+
+Still within the Chapter 6 transcript segment (before the "Migrate
+Assets" chapter heading appears), the creator walks through creating a
+node and an event completely from scratch, as a small guided example:
+
+1. **Create a node**: right-click anywhere empty in the graph to open
+   the node-creation search menu.
+2. Create an event linked to the keyboard: type **"keyboard F"** in the
+   search and select it — now the event fires whenever the **F** key is
+   pressed, and anything connected to it executes.
+3. **Connecting nodes**: drag from an output pin and release over a
+   target node's input — Unreal is smart enough to prompt for which
+   node you want to connect to directly (the creator picks **Print
+   String** to demo it).
+4. **Breaking a connection**: hold **Alt** and left-click a wire to
+   break it; connections can always be remade afterward.
+5. **Connecting two pins without dragging**: hold **Shift**, click the
+   first pin, then (still holding Shift) click the second pin — connects
+   them automatically.
+6. **Moving a pin's connection**: if you connect a pin to the wrong
+   place, hold **Ctrl** and drag with the left mouse button to pull that
+   connection out and reconnect it elsewhere.
+7. **Duplicating a node**: hover over the node(s) to duplicate and press
+   **Ctrl+D** (same shortcut as duplicating an object in the level).
+   **Delete** removes a selected node.
+8. **"Context Sensitive" search toggle**: if a node you're searching
+   for by name doesn't show up, that's because Unreal's search is
+   trying to intelligently guess which nodes are actually relevant to
+   your current context. It's correct roughly 95% of the time, but for
+   the rare cases it isn't, uncheck **Context Sensitive** in the search
+   panel to see every possible node.
+9. **Worked example — "Hello World" on keypress**:
+   - Search (with Context Sensitive still on) for **Print String**,
+     connect it after the F-key event.
+   - Print String has a text field — set it to `Hello World!` and a
+     **Duration** field (defaults to 2 seconds; changed to **5**).
+   - Move the Print String output's message into view, press **Play**,
+     press **F** in the game window — "Hello World!" appears in the
+     top-left corner of the screen for the set duration. Spamming F
+     re-triggers it each time.
+   - Summary: this tells Unreal "whenever the player presses F, print
+     Hello World to the screen" — deliberately simple logic just to
+     demonstrate the mechanics, before moving into the actual shooter
+     game logic next.
+
+## Chapter 7: Migrate Assets
+
+Bringing custom weapon/target assets from a *separate* downloadable
+project into the main "my first game" project — the same **Migrate**
+tool documented in the companion
+`ue5-road-material-blending-magnet.md` tutorial, used here for a
+different purpose (moving a handful of specific assets between two of
+your *own* projects, not pulling in a whole third-party pack):
+
+1. The assets to migrate ship inside a separate **"beginner game
+   assets"** download (same link as earlier in Chapter 6). If not
+   already downloaded, get it, then drag the zip onto the Desktop to
+   unzip it.
+2. This unzip produces a **brand new, separate Unreal project** — open
+   it. It's an otherwise-blank project that exists solely to hold the
+   assets to migrate: **Sci-Fi weapon** meshes (the gun the player will
+   use) and **target meshes** (the objects to destroy).
+   - Why these weren't bundled directly into the First Person template
+     project from Chapter 6: this is specifically meant to demonstrate
+     **migrating assets between two different projects**, a core skill
+     for working with multiple projects/asset packs.
+3. **Find your destination project's location first**: open "my first
+   game" (saved on the Desktop in this case), go to its **Content**
+   folder, and copy that folder's path/location.
+4. **Perform the migration** (from the source "beginner game assets"
+   project): select the relevant folders (hold **Shift** to multi-
+   select), right-click → **Migrate**. Confirm migrating all the
+   selected assets (**OK**).
+5. When prompted for the destination, navigate to (or paste, if already
+   copied) the target project's **Content** folder location, then
+   **Select Folder** — copies the assets across into "my first game."
+6. The source "beginner game assets" project is no longer needed after
+   this — it can be deleted.
+7. Back in the main project (**Ctrl+Space** to open the Content Drawer),
+   the migrated **weapons** and **target** assets now appear, ready to
+   use. Time to create the first custom Blueprint class.
+
+## Chapter 8: Creating a Blueprint
+
+Building a Blueprint completely from scratch for the first time (versus
+just inspecting the existing First Person Character Blueprint earlier):
+
+1. Navigate to the folder where the new Blueprint should live — the
+   creator picks the **First Person → Blueprints** folder, to keep all
+   custom programming logic organized in one place.
+2. Right-click an empty area of the Content Browser → **Blueprint
+   Class** (listed first in the creation menu — "the most important
+   asset type in Unreal").
+3. Unreal asks what **parent class** to base the new Blueprint on —
+   select **Actor**. Reasoning: **Actors are anything that can be
+   placed in the world** — a box, the sun, the sky are all Actors
+   because they can all exist in the level. Since this Target object
+   needs to be placed in the world, it has to be an Actor-class
+   Blueprint.
+4. Name it — the creator uses **`BP_Target`** (`BP_` prefix is just a
+   personal naming convention for all Blueprints, not a requirement;
+   you could just call it "Target"). **Rename an asset** anytime via
+   right-click → Rename, or the **F2** shortcut (same as renaming
+   project files, Chapter 6).
+5. Double-click to open the new Blueprint — it's completely blank
+   except for a small widget icon in the middle of the viewport,
+   representing the Blueprint's **Scene Root** (its origin point).
+6. **Adding the target mesh as a component**: in the Content Browser,
+   navigate to the migrated **Target** static mesh asset — the
+   transcript cuts off right as this step begins ("go to Target right
+   here and we have that static mesh so there are two...").
+
+*Transcript cuts off here, mid-sentence, right as the target mesh is
+about to be added to the new Blueprint as a component.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (building custom Blueprints, UI, weapons, Chaos physics
-destruction, and adding the finished game to an environment) and this
-file will be updated.*
+video (finishing the Target Blueprint, weapon/shooting logic, UI, Chaos
+physics destruction, and adding the finished game to an environment)
+and this file will be updated.*
