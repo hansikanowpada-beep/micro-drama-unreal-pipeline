@@ -23,13 +23,13 @@ Status: **partial capture** — covers the intro, all the foundational
 editor basics (chapters 3-4), Blueprint editor vocabulary (chapter 5),
 node-graph fundamentals, migrating assets (chapter 6-7), a finished
 `BP_Target` (chapter 8), a fully working score system (chapter 9), a
-complete score UI simplified via custom-event input parameters
-(chapter 10), graph organization tools (chapter 11), dynamically
-counting targets in the world to set `MaxScore` plus a working win
-condition (chapter 12), and the start of a `WBP_EndScreen` widget
-(chapter 13, cut off right as it's created and added to the viewport
-on win). The countdown timer / lose condition, Chaos physics
-destruction, and final environment assembly haven't been covered yet.
+complete score UI (chapter 10), graph organization tools (chapter 11),
+dynamic target counting plus a working win condition (chapter 12), a
+complete `WBP_EndScreen` with a restart button, input-mode/mouse-cursor
+handling, and a blurred background (chapter 13), and the start of a
+countdown timer (chapter 14, cut off right as "Set Timer by Event" is
+introduced). The lose condition, Chaos physics destruction, and final
+environment assembly haven't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -947,16 +947,124 @@ Graph tab, not just the static Designer view):
    - Drag from the Branch's **True** pin, type **"Create Widget"**,
      select `WBP_EndScreen` as the class. From its **Return Value**,
      drag out and connect to **"Add to Viewport"**.
+10. Compile. Testing confirms the win screen now appears when all
+    targets are hit — but two problems remain: the player can still
+    move around in the background, and there's no way to play again.
+11. **Add a Restart button**: in `WBP_EndScreen`, drag in a **Button**
+    widget, set its Anchor to **Center**, resize it, add a **Text**
+    child reading "Restart?".
+    - Style fix: the button is too bright by default — **Style →
+      Normal → Tint** → decrease to something darker.
+12. **Stopping gameplay and restoring the mouse on win**: back in
+    `GM_TargetGame`, after `Create Widget → Add to Viewport`:
+    - Drag out, add **"Set Input Mode UI Only"**, targeting the
+      End Screen widget — restricts player input to the UI only (no
+      more WASD/shoot while the end screen is up).
+    - Drag from **Get Player Controller**, add **"Show Mouse Cursor"**,
+      set to **true** — makes the cursor visible again (it's hidden
+      during normal FPS gameplay), so the player can actually click
+      Restart without needing the editor-only Shift+F1 shortcut.
+13. **Wiring the Restart button**: select it in `WBP_EndScreen`, scroll
+    its Details panel down, create an **On Clicked** event (default
+    name is an unclear auto-generated one like "OnClicked
+    (Button_0)" — rename the node to **"Restart Button"** for clarity).
+    - Drag out, add **"Open Level (by Object Reference)"**, and set its
+      Level input to the current level (`First Person Map`) — reloads
+      the entire level fresh, resetting everything.
+14. **Bug — after restarting, the player can't move**: the input mode
+    is still set to UI Only from the win screen and never gets reset.
+    **Fix**: in `GM_TargetGame`'s `Event Begin Play` (which runs again
+    on every level load, including after a restart), add `Get Player
+    Controller` → **"Set Input Mode Game Only"** — ensures every fresh
+    start/restart resets input back to normal gameplay controls.
+15. **Remaining issue — residual momentum on win**: if the player is
+    mid-movement when they land the final hit, their character keeps
+    sliding forward briefly even with input now blocked, since existing
+    momentum isn't input. **Fix**: on win (alongside the input-mode/
+    mouse-cursor nodes), drag from the Player Controller again and add
+    **"Set Ignore Move Input"** — immediately halts all movement
+    processing for the character the instant the win screen appears,
+    regardless of any momentum already in progress.
+16. Full flow re-tested and confirmed: hit all targets while running →
+    character stops dead, mouse cursor appears automatically, click
+    Restart → level reloads with movement fully working again.
+17. **Polish — blurred background on the end screen** (currently looks
+    "kind of bland"):
+    - In `WBP_EndScreen`'s Designer, search the Palette for "blur",
+      drag in a **Background Blur** element.
+    - Resize it to fill the entire canvas, set its Anchor to full-
+      screen stretch (same anchor concept as the score UI, so it covers
+      the screen at any window size).
+    - With it selected, increase **Blur Strength** to **2**.
+    - **Troubleshooting — the blur covers/hides the text and button**:
+      caused by Hierarchy ordering. Unlike Photoshop-style layer lists,
+      **Unreal's Hierarchy panel stacks bottom-to-top** — an element
+      lower in the list renders *underneath* elements above it. Since
+      Background Blur was added last (at the bottom), it was rendering
+      on top of everything. **Fix**: drag the Background Blur entry up
+      in the Hierarchy so it sits directly after the Canvas Panel
+      (i.e., first/bottommost child) — the text and button now
+      correctly render on top of the blur instead of being hidden
+      behind it.
+18. **Recap of the whole system so far** (in the creator's own words):
+    `BP_Target` is a static mesh that checks whether a projectile hit
+    it; if so, adds a score to the Game Mode and marks itself so it
+    can't be hit again. The Game Mode does most of the work: at `Event
+    Begin Play` it counts how many Targets exist in the world and sets
+    that as `MaxScore` (confirmed dynamic — adding a 4th Target in the
+    level makes the max automatically become 4 instead of 3), creates
+    the score UI widget, adds 1 to `CurrentScore` and updates the UI
+    whenever a Target is hit, and checks whether `CurrentScore` equals
+    `MaxScore` — if so, showing the End Screen and stopping the player.
 
-*Transcript cuts off here, right as the win-screen widget is being
-created and added to the viewport — likely continues into actually
-pausing/stopping gameplay when the player wins, and building the lose
-condition (the countdown timer) that `WBP_EndScreen` is also meant to
-handle.*
+## Chapter 14: Timer (partial — cut off mid-explanation)
+
+1. **Motivation**: the game currently has no time pressure — the player
+   has unlimited time to hit every target, which isn't very
+   challenging. Plan: add a countdown timer; if it expires before all
+   targets are hit, the player **loses** — the game now has two
+   possible outcomes (win or lose), not just one.
+2. **Level prep — spread the targets out** for the timer to actually
+   matter: reposition the 3 existing targets further apart in the
+   level, vary their size (make one bigger than another) for visual
+   interest.
+3. **Troubleshooting — a Target rotates oddly / doesn't visibly "face"
+   anywhere**: caused by the specific mesh variant being used (a
+   rotationally-symmetric sphere shape by default in this asset, which
+   looks the same no matter how it's rotated). Fix: swap to a different
+   mesh variant within the same asset (e.g. a cube-shaped option
+   instead of the sphere icon) so rotation now has a visible effect.
+4. Reposition the Directional Light (**Ctrl+L**, same technique as
+   throughout this and the companion tutorials) for the new target
+   layout.
+5. **Player Start actor**: without one in the level, pressing Play
+   spawns the player wherever the editor camera currently happens to
+   be — unpredictable. Adding a dedicated **Player Start** (Place
+   Actors panel → Basics category) lets you fix exactly where and which
+   direction the player spawns, regardless of the editor camera's
+   position. Angle it to face the targets.
+   - **Tip — testing from the current camera view instead**: click the
+     small 3-dot menu next to the **Play** button → under its Spawn
+     Player options, choose **"Current Camera Location"** instead of
+     **"Default Player Start"** for quick iteration without needing to
+     reposition the camera to match the Player Start each time; switch
+     back to **"Player Start"** afterward for normal testing.
+6. **Building the timer logic**: in `GM_TargetGame`'s event graph,
+   select the `Add Score` event and its whole connected node group,
+   nudge it down to make room above for the new timer logic.
+7. At the very end of `Event Begin Play` (after the initial score UI
+   setup), add a new **Custom Event** named **"Set Timer by Event"** —
+   referencing Unreal's actual built-in **Set Timer by Event** node,
+   used to schedule a function to run repeatedly or after a delay.
+
+*Transcript cuts off here, right as the Set Timer by Event node's
+purpose is about to be explained ("what this node will do is that any
+event that is hooked up to this node...") — likely continues into
+building the countdown-timer tick logic and the lose condition.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the win screen, the countdown timer and lose
-condition, Chaos physics destruction, and adding the finished game to
-an environment) and this file will be updated.*
+video (finishing the countdown timer, the lose condition, Chaos physics
+destruction, and adding the finished game to an environment) and this
+file will be updated.*
