@@ -17,15 +17,15 @@ road/material-blending one in this repo) before getting to its stated
 goal of a MetaHuman character animation. Kept as its own file.
 
 Status: **partial capture** — covers landscape/water/tree setup, camera
-and lighting, landscape sculpting with PCG regeneration, grass
-scattering, PCG brush-based painting as an alternative to spline areas,
-and stone pillars + a collision-tagged rock that interacts with the
-shallow water simulation (chapter 16, cut off). The MetaHuman-specific
-work (the video's actual stated goal) hasn't been reached yet in the
-transcript. Chapters 3-4 (landscape sculpting and the initial landscape
-material) are only partially captured — picked up already in progress —
-note the gap below. More to be added as further transcript/screenshots
-are shared.
+and lighting, landscape sculpting with PCG regeneration, grass/rock/ivy
+foliage painting, stone pillars with shallow-water collision tagging,
+and the start of a falling-leaves Niagara effect imported from a free
+sample project via direct Content-folder copy-paste (chapter 18, cut
+off). The MetaHuman-specific work (the video's actual stated goal)
+hasn't been reached yet in the transcript. Chapters 3-4 (landscape
+sculpting and the initial landscape material) are only partially
+captured — picked up already in progress — note the gap below. More to
+be added as further transcript/screenshots are shared.
 
 ## Chapter 1: Project introduction
 
@@ -474,13 +474,119 @@ scattering (click/drag to place) rather than area-based scattering
       "reset", click **Reset** to re-run the simulation incorporating
       the newly tagged rock.
 
-*Transcript cuts off here, right after clicking Reset — likely confirms
-the water now reacts to the tagged rock asset, then continues further
-scene dressing.*
+3. Confirmed: moving the tagged asset shows it visibly interacting with
+   the water. Duplicate it many times to cover the whole river bank.
+4. **Simulation performance**: with many tagged assets now present, the
+   live simulation gets laggy in the editor — **bake it**: select the
+   Shallow Water River, via its render-state dropdown select **Water
+   Component → Bake Sim** (removes the real-time cost while keeping the
+   simulated result).
+5. Continue duplicating rock/ground assets along the bank, reposition
+   (dip down / rotate) some for variety, then **re-simulate** (Reset)
+   and **re-bake** each time more tagged assets are added or moved.
+6. **Troubleshooting — water leaking through a gap**: duplicate another
+   asset into the gap to block the leak, then bake the simulation again
+   (press **G** to preview).
+
+## Chapter 17: Detailing and optimization
+
+1. **Water material clarity**: open the baked water material (double-
+   click), search **"anisotropy"**, enable it, increase the value to
+   **1** — produces a clearer-looking water surface. Save, close.
+2. **Mossy material on the stone pillars**: download **"Mossy Rock"**
+   from Quixel Megascans (transcript renders the source as "quicksell
+   mega scan" — read as Quixel, consistent with earlier mis-
+   transcriptions of that brand name), highest quality, Add to Project.
+   Apply it onto the pillar assets for an aged/weathered look.
+   - **Specularity fix**: open the material, find **Specular**, decrease
+     to **2**. Save, close.
+   - Apply the same material to the rock/ground assets too.
+   - **Reminder**: any time a tagged rock's position changes, the river
+     needs re-simulating — Shallow Water River → **Reset** → bake via
+     **Water Component → Bake Sim** again.
+3. **More rocks via the Foliage system** (rather than manual placement):
+   download additional rock assets from Fab, enable Static Mesh filter.
+   - Selection mode → **Foliage** → select the new rock assets → drag to
+     add to the foliage palette.
+   - Increase brush size to **100**.
+   - **Troubleshooting — rocks too small**: select all the rock meshes
+     in the palette, set **Scale X** Min = **2**, Max = **4**.
+   - Decrease **Density** to **20**, delete the earlier painted pass,
+     repaint.
+   - **Troubleshooting — rocks floating above ground in some spots**:
+     disable the Static Mesh and BSP selection filters so only the
+     **Landscape** itself is selectable as a paint target; also disable
+     the **Water Body River** in the Outliner temporarily (so painting
+     doesn't snap to the water surface); decrease Density further to
+     **5**; repaint. Re-enable the river afterward.
+4. **Ivy on the pillars**: download an **"Ivy Plants"** pack from Fab,
+   Add to Project, apply via the Foliage system:
+   - Disable the rock assets in the Foliage palette, select the ivy
+     plants, add them.
+   - Since the pillars stand **vertical/perpendicular** to the ground
+     (same issue as foliage-painting a building wall earlier in this
+     video and in the road/material tutorial): set the foliage tool's
+     ground **slope angle** maximum to **180** so it can paint on
+     vertical surfaces.
+   - Enable the **Static Mesh** option in the Foliage tool so it can
+     paint onto the pillar meshes themselves, not just the landscape.
+   - **Troubleshooting — density too low**: select all the ivy assets,
+     increase **Density** to **1000**; decrease brush size to **50**;
+     delete the earlier sparse pass, repaint; also raise the **Paint
+     Density** slider to its maximum (**1**).
+   - **Enable Nanite** on all the ivy assets (select all, right-click →
+     Nanite).
+   - **Color-match the ivy material**: open one ivy asset's material,
+     decrease **Brightness**; also find **Translucency Control** and
+     decrease its **Brightness** too — brings the ivy's color in line
+     with the other grass/foliage already in the scene. Save, close,
+     repaint.
+5. **More tree variety**: a pine tree from the Mega Plant pack, run
+   through the same wind-enabling Blueprint process as every other tree
+   in this video, placed manually around the scene.
+6. Landscaping is essentially complete at this point — next: visual
+   effects (falling leaves, localized volumetric fog), leading into
+   Chapter 18.
+
+## Chapter 18: Final effects and rendering (partial — cuts off mid-step)
+
+1. **Sourcing a falling-leaves Niagara effect**: rather than downloading
+   a Fab asset directly, this uses a **free sample project** called
+   "Electric Dim Environment" (the same pack referenced for ivy/plants
+   in the companion road/material-blending tutorial — transcribed name
+   kept as-is, likely imprecise; this may be the same asset pack, worth
+   cross-checking against that file's Chapter 6 notes).
+   - Download it via the **Epic Games Launcher**: "View in Launcher" →
+     scroll down → **Create Project** → choose a destination path →
+     **Create**.
+2. **Importing from it — a different technique than the in-editor
+   Migrate tool** used for a similar situation in the road/material
+   tutorial: instead of opening the sample project and using Asset
+   Actions → Migrate, this video copies files directly at the OS level:
+   - Don't open the downloaded sample project in Unreal. Instead, go to
+     its **Content** folder (via the OS file explorer) and select all
+     its subfolders, right-click → **Copy**.
+   - Open the Epic Games Launcher → **Library**, find your actual
+     working project ("tutorial"), right-click → **Show in Folder**.
+   - Navigate to that project's own **Content** folder, **paste** the
+     copied folders directly in.
+   - Back in the Unreal Editor's Content Browser: disable the Blueprint
+     Class/Skeletal Mesh filters to see the newly pasted folders, then
+     click **Import** (Unreal re-registers/fixes up the pasted assets
+     for the current project).
+3. **Falling leaves**: browse to **Effects → Environments → Leaves**
+   folder (transcript renders this "Lips," almost certainly "Leaves")
+   inside the newly imported content — contains a **Niagara particle
+   system** for falling leaves.
+4. Place this Niagara system into the scene.
+5. Increase the amount/density of falling leaves — the transcript cuts
+   off right as this adjustment begins ("we go to this outliner section
+   and clear the...").
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (further scene dressing, and — the video's actual title topic —
-creating/importing a MetaHuman, rigging, and animating it) and this file
-will be updated.*
+video (finishing the falling-leaves density, the mentioned localized
+volumetric fog, and — the video's actual title topic — creating/
+importing a MetaHuman, rigging, and animating it) and this file will be
+updated.*
