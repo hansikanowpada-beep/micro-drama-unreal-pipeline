@@ -5,9 +5,9 @@ video transcript (shared as screenshots, not watched directly — so exact
 button positions/labels should be double-checked against the live video,
 but the sequence of operations below is accurate to the transcript).
 
-Status: **partial capture** — covers through foliage painting (chapter 8
-of 8+). More chapters to be added as further transcript/screenshots are
-shared.
+Status: **partial capture** — covers through the start of keyframing
+character movement in Sequencer (chapter 13, cut off mid-explanation).
+More chapters to be added as further transcript/screenshots are shared.
 
 ## Chapter 1: Introduction
 
@@ -185,8 +185,128 @@ imported ground-surface model to position it):
      foliage instances; use the same right-click fly-camera navigation
      from Chapter 5 to reposition the view while painting larger areas.
 
+- Foliage also catches on cliff/rock Megascan surfaces — these models are
+  pre-programmed so that only their "foliage-enabled" (green-marked)
+  faces catch painted foliage, not every surface (e.g. not bare rock
+  faces) — this is automatic, nothing extra to configure.
+- Keep filling empty-looking areas with duplicated rock models as needed.
+
+## Chapter 9: Final lighting adjustments
+
+- Hold **Ctrl+L** and move the mouse to reposition the sun to a more
+  deliberate angle (the tutorial aims for a dusk-like look) now that the
+  full environment is in place — same control introduced in Chapter 3,
+  now used for creative framing rather than just brightness.
+
+## Chapter 10: Cinematic camera setup
+
+1. Place Actors panel → **Cinematics** category → **Cine Camera Actor**.
+2. Select the camera and switch the viewport to look through its lens
+   (the viewport's camera/perspective dropdown lets you pick a placed
+   camera to preview through — i.e. "pilot" that camera).
+3. **Framing**:
+   - Camera's **Film Back** setting → set to **16:9 DSLR** (aspect-ratio
+     preset) if the default crop looks off.
+   - If still too zoomed in, change the **Lens** to a wider prime —
+     tutorial uses a **12mm prime lens** for a wide-angle look.
+4. **Camera lens effects** (Details panel → Lens/Post Process section,
+   same camera actor):
+   - **Bloom** — enable, set method to **Standard/Conventional**, adjust
+     **Intensity** to taste.
+   - **Chromatic Aberration** — enable, set **Intensity**; also raise
+     **Start Offset** so the aberration only shows near the frame edges,
+     not across the whole image (closer to a real lens).
+   - **Lens Flare** — enable, set **Intensity** (tutorial lowers it to
+     ~0.5 when too strong). This reacts dynamically to the sun's
+     position — moving the Directional Light moves the flare too.
+
+## Chapter 11: Adding the character
+
+1. In the Content Drawer, navigate to the character asset's folder (the
+   tutorial's example path is a Characters/Heroes folder from a
+   marketplace pack) and find its mesh.
+2. **Important**: a character is a **Skeletal Mesh**, not a Static Mesh —
+   if you had the Chapter 8 "Static Meshes" filter still active in the
+   Content Browser, uncheck it, or the character won't show up in search
+   results.
+3. Drag the character into the level.
+4. Expect a shader-compile delay after first dragging a new character in
+   (the tutorial notes ~10 minutes) — the viewport stays navigable but
+   the character may render untextured/laggy until shaders finish
+   compiling. This is normal, not an error.
+5. At this point the character is just placed in the level with no
+   animation yet — animation is set up next, via Sequencer.
+
+## Chapter 12: Character animation setup (Level Sequencer basics)
+
+1. Place Actors panel → **Cinematics** → **Add Level Sequence**. You'll
+   be prompted to save the project first.
+2. This opens the **Sequencer** panel. Drag actors from the viewport/
+   outliner into it to add them as tracks — first the **Cine Camera
+   Actor**.
+3. **Frame rate**: for a 24fps-style video, set the sequence's frame
+   rate to **23.976** (the standard NTSC film rate) via the Sequencer's
+   frame-rate control.
+4. **Sequence length**: compute from your target duration — e.g. 10
+   seconds at 24fps ≈ **240 frames**. Drag the red playback-range end
+   marker out to that frame.
+   - Gotcha called out in the tutorial: extending the overall sequence
+     range does **not** automatically extend each track's own clip bar
+     (e.g. the camera's "camera cut" clip) — you have to separately drag
+     each track's clip to match the new sequence length, easy to miss.
+5. The **Camera's Transform track** lets you keyframe the camera's
+   location/rotation directly over time in Sequencer, for camera moves.
+6. Drag the **character actor** into Sequencer as well.
+7. Add an **Animation track** to the character (Track button →
+   Animation) and pick a clip from the available animation library (the
+   example skeleton ships with many, e.g. "Idle" variants).
+   - Adding a clip inserts it starting at the current playhead position;
+     drag the clip left/right to change when it starts.
+   - Troubleshooting note from the tutorial: the default "Idle" clip
+     held the character's weapon prop at an odd angle — fixed by
+     deleting that clip and trying a different idle variant ("Idle
+     Relaxed") that held the prop correctly. If a stock animation looks
+     wrong on your character/prop combo, just try a different preset
+     clip rather than assuming something is broken.
+8. For movement, search the Animation track's clip picker for a term
+   like "jogging" — large asset packs ship many jogging/running preset
+   clips (e.g. "Jog Forward").
+   - **Key concept**: a looping locomotion clip like "Jog Forward" is an
+     **in-place** animation — it plays the running motion but does
+     **not** move the character through the level on its own. Making
+     the character actually travel along the ground requires separately
+     animating its **Transform** (position) over time — see Chapter 13.
+
+## Chapter 13: Animating character movement (partial — transcript cuts off here)
+
+1. Switch the main editor viewport back to free **Viewport** navigation
+   (un-pilot the Sequencer camera) so you can move around independently
+   while setting up the character's path, without disturbing the
+   camera's own keyframed motion.
+2. Re-adjust the free-fly camera speed as needed for this finer
+   positioning work (same speed control from Chapter 5).
+3. Select the character, use **E** (rotate) to set its initial facing
+   direction.
+4. Position the character at the scene's intended starting point for
+   the shot.
+5. Extend the character's **Animation** clip in Sequencer (drag its
+   right edge) to cover the full shot duration, so the loop keeps
+   playing for the whole sequence.
+6. Move the Sequencer playhead to the very start of the timeline
+   (frame 0).
+7. Add a keyframe on the character's **Transform** (location) at this
+   starting position — this is the mechanism for animating movement:
+   keyframe the start position at frame 0, then later move the playhead
+   forward in time and keyframe a new (moved) position; Sequencer
+   interpolates the character smoothly between the two, producing
+   actual on-screen movement to go with the in-place run/walk cycle.
+
+*The transcript ends here mid-explanation of the second keyframe — next
+batch should pick up with keyframing the end position and likely
+rendering/exporting the final shot via Movie Render Queue.*
+
 ---
 
 *To extend: send more transcript/screenshots from later chapters of this
-video (character placement, camera work, Sequencer, lighting polish,
-rendering) and this file will be updated to cover the full workflow.*
+video (finishing the movement keyframes, lighting polish, rendering/
+export) and this file will be updated to cover the full workflow.*
