@@ -28,13 +28,13 @@ dynamic target counting plus a working win condition (chapter 12), a
 complete `WBP_EndScreen` (chapter 13), a fully working countdown timer
 and lose condition (chapter 14), a complete `BP_Rifle` weapon
 Blueprint (chapter 15), a complete custom `BP_Bullets` projectile
-(chapter 16), and a near-complete Chaos Destruction system (chapter
-17) — physics simulation basics, Geometry Collections/Fracture with
-cascading layers, Mass Clamp tuning, and a bullet-triggered
-`FS_Master Field` radial force burst (spawn → trigger immediately →
-destroy itself) wired into the existing hit logic. Cut off right at
-the final live test. Only "adding the finished game to an environment"
-remains uncaptured, per the video's own stated scope.
+(chapter 16), a complete Chaos Destruction system fully wired into
+real Geometry Collection Targets (chapter 17), and the start of
+Chapter 18 (Environment) — migrating the finished game into Epic's
+free "Electric Dreams"/PCG sample content (or the companion Starter
+Course's own Castle Forest environment), cut off right as the
+character/Blueprint migration into the new level begins. This appears
+to be the video's final remaining topic.
 
 ## Chapter 1: Intro
 
@@ -1622,16 +1622,161 @@ force-field actor:
     - This whole chain (spawn → trigger → destroy the field) runs
       alongside the bullet's own existing `Destroy Actor` call, so
       bullet cleanup and the force-field burst happen together on hit.
-18. Play, fire at a target —
+18. Play, fire at a target — confirmed working: the target shatters
+    and the player can keep firing at the scattered chunks to destroy
+    additional pieces too.
+19. **Troubleshooting — looking down while firing makes the player
+    move**: caused by the bullet physically colliding with the player
+    character itself (a Pawn).
+    - **Fix**: select the bullet's Sphere (visual mesh), change its
+      **Collision preset** from **Block All** to **Custom**, and set it
+      to **ignore Pawn** specifically while still blocking everything
+      else — fixes the glitch without affecting normal target hits.
+20. **Swapping in the real Geometry Collection Targets**: up to this
+    point, `BP_Target` still used a plain static mesh — now replace it
+    with the actual `SM_Target_GeometryCollection` built earlier.
+    - Open `BP_Target` (Ctrl+E on a placed instance), delete the old
+      static mesh component (confirm past the reference warning), add
+      a **Geometry Collection** component instead, assign
+      `SM_Target_GeometryCollection` to it.
+21. **Troubleshooting — geometry collection targets fall through the
+    floor**: a fresh Geometry Collection component's Collision preset
+    needs setting explicitly. **Fix**: set it to **Block All**.
+22. **Troubleshooting — targets shatter immediately on Play, just from
+    falling**: a newly added Geometry Collection component apparently
+    has **Simulate Physics** enabled by default, so it immediately
+    falls and breaks before the player does anything.
+    - **Fix**: select the Geometry Collection, **disable Simulate
+      Physics** — it now stays put until explicitly triggered.
+23. **Re-wiring hit detection for the new component**: nothing detects
+    bullet hits on the Geometry Collection yet.
+    - Add a **Box Collision** component, sized smaller than the full
+      geometry collection (roughly encompassing the bulk of the
+      target), set to **Block All** (matching the Geometry Collection's
+      own collision, so pieces don't fall through the floor).
+    - Add **On Component Hit** on this Box, and hook it up to the
+      *same* existing chain already built in earlier chapters (Cast to
+      `BP_Bullets`, the `IsHit?` Branch, `Add Score`, etc.) — re-tested
+      and confirmed still working end to end (score 1→2→3→4, win).
+24. **Enabling physics specifically on first hit**: inside the Box's
+    `On Component Hit`, reusing the existing "first time being hit"
+    Branch pattern — on the first hit, drag out the **Geometry
+    Collection** → **Set Simulate Physics = True**. This is what
+    actually lets the target fall apart/react physically, and it now
+    only happens because the bullet's force-field burst (built earlier
+    this chapter) hits it right at this moment — not from ambient
+    physics.
+25. **Troubleshooting — a destroyed target still blocks the player**:
+    the leftover Box Collision keeps physically blocking movement
+    through that space even after the target's been shattered.
+    - **Fix**: alongside setting Simulate Physics true, also drag from
+      the Box → **"Set Collision Enabled"** → **No Collision** — lets
+      the player (and further bullets) pass freely through where a
+      destroyed target used to stand. Noted that the exact ordering of
+      this node relative to the others here doesn't matter.
+26. **Material polish — fractured pieces show a wrong/blank interior**:
+    when a piece breaks and exposes its "inside," that interior face
+    was showing a plain default color because the wrong material slot
+    was assigned.
+    - In `BP_Target` (Geometry Collection selected): **Element 0** is
+      the main/outer material (normally visible); **Element 1** is the
+      secondary/interior material (revealed only on broken faces) — it
+      was pointing at the wrong material.
+    - **Fix**: assign **`M_Target_Interior`** (a simple texture made
+      specifically for this purpose, found in the Target asset folder)
+      to Element 1. Confirmed: broken pieces now show a proper
+      wood-interior texture instead of a blank color — "a small
+      change but it does make a difference... looks more natural" on
+      close inspection.
+27. **Chapter 17 recap** (creator's own words): "that is the very
+    basics of how to program a game in Unreal Engine using Blueprints."
 
-*Transcript cuts off here, right as this final live test begins
-("press play if I come over here and fire") — likely confirms the
-Target now physically breaks apart into fractured pieces specifically
-when shot, completing the Chaos Destruction feature.*
+## Chapter 18: Environment (partial — cut off mid-step)
+
+1. **Motivation**: with the game logic complete, "there is one more
+   issue — the environment. The world of our game is very boring, it's
+   just the default First Person map, which is a bunch of cubes." Plan:
+   migrate the finished game into a more visually interesting
+   environment.
+2. **Recommended first option — build your own environment**: the
+   creator points to their *other* beginner tutorial focused on level/
+   environment design — confirmed to be
+   `ue5-starter-course-unrealsensei.md`, already captured in this repo
+   — where a full "Castle Forest" environment is built from scratch,
+   directly reusable as this game's world. Demo: the creator's own
+   example scatters the Target actors around that Castle Forest level
+   specifically to force the player to explore rather than stand still.
+3. **Alternative — use free sample content instead of building one**:
+   browse the Epic/Fab Marketplace, or — demonstrated live here —
+   Unreal ships its own bundle of free sample environments under a
+   **"Samples"** page/tab in the Project Browser.
+   - The creator picks **"Electric Dreams"** ("I think this looks the
+     nicest... a jungle").
+   - **Performance warning**: Electric Dreams is explicitly called out
+     as a demanding/intensive project — if your computer can't handle
+     it, pick a simpler sample instead. The same creation process
+     applies to any of the other sample environments, not just this
+     one.
+   - To create a project from it: select it, name the project, choose
+     a save location (Desktop in the demo), **Create**.
+   - **Download size warning**: roughly **60 GB** — can take a while.
+4. After download: find the project on the Desktop, double-click to
+   open. First launch takes a while to compile shaders. Unreal shows
+   the project's **recommended system specs** before/during this —
+   if your machine is below minimum spec, running this specific
+   project isn't recommended (pick a lighter sample instead).
+5. **Two relevant levels inside the Electric Dreams project**:
+   - The main **Electric Dreams** level (the full, intensive demo
+     scene) — opened via the Levels folder.
+   - A lighter-weight alternative: **PCG Close Range**, opened via
+     Levels → PCG folder — smaller and easier to run for less powerful
+     machines.
+6. Opening the main Electric Dreams level (internal name rendered in
+   the transcript as "ED_EMV" or similar) — confirmed genuinely heavy
+   to run:
+   - **Ctrl+Shift+H** toggles an on-screen frame-rate counter (top
+     right). On the creator's own machine (an RTX 3090), it runs at
+     roughly **30 FPS** — "yes, this project is intense, but it is the
+     nicest looking project in Unreal Engine."
+7. **Reducing UI clutter in this demo scene**: this sample ships with a
+   lot of editor-only widgets visible by default.
+   - **G** (Game View) shows exactly what the player would actually
+     see, without those widgets — same shortcut used throughout this
+     video and the companion tutorials.
+   - **F10** ("F and 10" in the transcript) toggles hiding all docked
+     editor panel windows at once, distinct from the earlier-documented
+     **F11** Immersive Mode (true full-screen viewport) from Chapter 3
+     — individual hidden windows can also be restored one at a time by
+     hovering/clicking them back in. Worth confirming the exact key
+     (F10 vs. F11) against the live video, since this wasn't fully
+     unambiguous in the transcript.
+8. **Context on this content**: Electric Dreams/PCG Close Range exists
+   specifically to showcase **PCG** (Procedural Content Generation),
+   the same procedural framework already covered extensively in the
+   tree/foliage-scattering chapters of
+   `tutorials/ue5-starter-course-unrealsensei.md`. The creator mentions
+   dedicated future tutorials/content on PCG tools specifically.
+9. **Player controls in the sample**: pressing Play auto-spawns the
+   player as a flying/floating camera "drone" — many of Unreal's free
+   sample environments ship with their own default Game Mode and
+   Player Controller (here, a drone-style one), closely mirroring the
+   editor's own free-fly camera but with smoother/eased movement.
+10. **Final step begins**: "I do not want to use this player character
+    — of course I want to bring the [character/game] that we've been
+    creating and add it into this environment." Press **Escape** to
+    exit Play. Select a placeholder descriptive-text object sitting in
+    the scene (in the way of the shot), press **Delete** to remove it.
+
+*Transcript cuts off here, right as the actual migration of the FPS
+game's assets/Blueprints into this new environment begins — likely
+continues into bringing `BP_FirstPersonCharacter`, `GM_TargetGame`,
+`WBP_UI`/`WBP_EndScreen`, and the Target/rifle Blueprints into the
+Electric Dreams or PCG Close Range level, setting the new level's Game
+Mode Override, and placing Targets throughout it — the video's final
+remaining topic.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (confirming the destruction test, and adding the finished game
-to an environment — the video's final remaining topic per the
-episode's own description) and this file will be updated.*
+video (finishing the environment migration, which appears to be the
+video's final chapter) and this file will be updated.*
