@@ -1,22 +1,36 @@
 # Tutorial notes: MetaHuman performance capture from video (UE5.8)
 
-Source: a YouTube video from the same channel as the other tutorial-
-notes files in this repo (Magnet VFX / "Amit"), captured mid-stream —
-**chapters 1-9 were not captured**, so this picks up partway through.
-Captured from the video transcript (screenshots, not watched directly).
+**Attribution now uncertain (see correction note)**: this file originally
+claimed the same channel as the other tutorial-notes files in this repo
+(Magnet VFX / "Amit"), reasoning by analogy with the landscape/water/
+PCG-tree video it was sent alongside. That landscape video was since
+confirmed, from an actual screenshot of its YouTube page, to really be
+by a *different* channel — **Unreal Sensei** — not Magnet/Amit (see the
+correction note at the top of `ue5-starter-course-unrealsensei.md`,
+the renamed file formerly called `ue5-metahuman-animation-magnet.md`).
+That breaks the original reasoning for this file's attribution too:
+this video's actual source channel is now **unverified** — it could be
+Unreal Sensei, Magnet/Amit, or a third channel entirely. Treat the
+"Magnet VFX" credit below as unconfirmed until a screenshot of this
+specific video's own YouTube page is seen.
 
-**Important — likely a separate video, not a continuation**: this
-content was sent right after the landscape/water/PCG-tree video
-(`ue5-metahuman-animation-magnet.md`), but the two don't fit together:
-this one reuses chapter numbers already used there ("Chapter 10,"
-"Chapter 11") for entirely different content, opens with a MetaHuman
-character already placed inside a pre-built **"Temple of Cambodia"**
-demo map (not anything built earlier in that other video), and the
-creator explicitly says "in my original video I make a POV shot... now
-I'm going to show you how you can make your custom metahuman animation"
-— referring back to a *different, separate* video. Treat this as its own
-tutorial unless corrected. If it turns out to actually be the same video
-continuing, these notes should be merged into the other file instead.
+Source (as originally assumed, now unverified): a YouTube video,
+captured mid-stream — **chapters 1-9 were not captured**, so this picks
+up partway through. Captured from the video transcript (screenshots,
+not watched directly).
+
+**Separate video, not a continuation of the landscape/PCG-tree one**:
+this content was sent right after the landscape/water/PCG-tree video,
+but the two don't fit together: this one reuses chapter numbers already
+used there ("Chapter 10," "Chapter 11") for entirely different content,
+opens with a MetaHuman character already placed inside a pre-built
+**"Temple of Cambodia"** demo map (not anything built earlier in that
+other video), and the creator explicitly says "in my original video I
+make a POV shot... now I'm going to show you how you can make your
+custom metahuman animation" — referring back to a *different, separate*
+video (possibly `ue5-starter-course-unrealsensei.md`, possibly a third
+video altogether — unconfirmed). Treat this as its own tutorial from an
+unverified channel until corrected.
 
 Status: **partial capture** — picks up with exporting/animating a
 MetaHuman in Sequencer, through video-based performance capture, a full

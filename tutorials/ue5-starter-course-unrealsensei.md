@@ -1,31 +1,46 @@
-# Tutorial notes: UE5.8 Starter Course (landscape/water/trees → MetaHuman)
+# Tutorial notes: UE5 Starter Course — landscape/water/foliage environment
 
-Source: **"Unreal Engine 5.8 Beginner Tutorial - UE5 Starter Course
-2026"** by **Magnet VFX** (creator credited as "Amit" in on-screen links
-— Instagram/Facebook/YouTube handles `amit.gcts`/`amitdasfilms` — the
-transcript's speech-to-text renders the spoken name as "Omit"; same
-channel as the other two tutorial-notes files in this repo). Published
-~1 month before capture, 22K+ views. Captured from the video transcript
-(screenshots, not watched directly) — double-check exact button labels
-against the live video.
+**Attribution correction**: earlier versions of this file incorrectly
+credited this video to "Magnet VFX / Amit," by analogy with the other
+two tutorial-notes files in this repo. A later screenshot of the actual
+YouTube video page showed the real source: **"Unreal Engine 5 Beginner
+Tutorial - UE5 Starter Course"** by **Unreal Sensei** (560K subscribers,
+6.7M views, published 4 years before capture) — video 1 of an 11-part
+"Unreal Engine 5 Beginner Tutorials" playlist. **This is NOT the same
+channel as `ue5-environment-basics-magnet.md` or
+`ue5-road-material-blending-magnet.md`** — those two may still be
+correctly attributed to Magnet/Amit (no correction evidence seen for
+them), but this file is a different creator entirely. The filename was
+renamed from `ue5-metahuman-animation-magnet.md` to
+`ue5-starter-course-unrealsensei.md` to reflect this.
 
-This is a **third, separate** video from the same channel — a broader
-"starter course" than the title first suggested: it builds a full
-landscape/water/foliage environment from scratch (general UE5
-fundamentals, distinct from both the environment-basics tutorial and the
-road/material-blending one in this repo) before getting to its stated
-goal of a MetaHuman character animation. Kept as its own file.
+The video player showed **0:02 / 5:00:00** — this is one video in a
+**5-hour** mega-course, of which the transcript captured so far covers
+roughly the first ~66 minutes (an environment-building module, YouTube
+auto-chapters 1 through the rendering/export step). The creator's
+sign-off dialogue at the end of the captured transcript ("till then
+take care and bye-bye") may mark the end of just this module/segment
+within the larger 5-hour video, not necessarily the whole video — the
+MetaHuman-specific content implied by earlier (incorrect) assumptions
+about this file's topic may or may not appear later in the same 5-hour
+video; this needs verification against the actual video, not assumed.
 
-Status: **partial capture** — covers landscape/water/tree setup, camera
-and lighting, landscape sculpting with PCG regeneration, grass/rock/ivy
-foliage painting, stone pillars with shallow-water collision tagging,
-and the start of a falling-leaves Niagara effect imported from a free
-sample project via direct Content-folder copy-paste (chapter 18, cut
-off). The MetaHuman-specific work (the video's actual stated goal)
-hasn't been reached yet in the transcript. Chapters 3-4 (landscape
-sculpting and the initial landscape material) are only partially
-captured — picked up already in progress — note the gap below. More to
-be added as further transcript/screenshots are shared.
+Captured from the video transcript (screenshots, not watched directly)
+— double-check exact button labels against the live video.
+
+Status: **partial capture of a ~66-minute environment-building segment**
+within a much longer (5-hour) video — covers landscape/water/tree setup,
+camera and lighting, landscape sculpting with PCG regeneration,
+grass/rock/ivy foliage painting, stone pillars with shallow-water
+collision tagging, a falling-leaves Niagara effect, localized fog, final
+camera animation, and Movie Render Queue export to an EXR sequence —
+ending on what reads as a complete sign-off. Whether this is the end of
+the captured module or the end of the entire 5-hour video is unclear.
+Chapters 3-4 (landscape sculpting and the initial landscape material)
+are only partially captured — picked up already in progress — note the
+gap below. More to be added as further transcript/screenshots are
+shared, including checking whether this same video continues into
+MetaHuman content later on.
 
 ## Chapter 1: Project introduction
 
@@ -579,14 +594,77 @@ scattering (click/drag to place) rather than area-based scattering
    inside the newly imported content — contains a **Niagara particle
    system** for falling leaves.
 4. Place this Niagara system into the scene.
-5. Increase the amount/density of falling leaves — the transcript cuts
-   off right as this adjustment begins ("we go to this outliner section
-   and clear the...").
+5. **Increase falling-leaves density**: select the Niagara system,
+   Details panel → **Spawn Rate** tab → expand → increase **Count** to
+   **100** for more visible falling leaves.
+6. Duplicate the leaves system, place a second copy elsewhere, press
+   **G** to preview both.
+7. **Localized fog**: back in the imported content, browse to
+   **Effects → Mist** folder, find a fog Blueprint (transcript renders
+   its name as "Fork Cut Blueprint" — likely a mis-transcription of the
+   actual asset name; verify against the live video). Place it into the
+   scene.
+   - Increase its **scale**.
+   - Decrease its **Intensity** (Details panel) for a subtler, more
+     localized effect rather than a thick blanket of fog.
+   - Duplicate, place a second patch elsewhere.
+8. **Final camera animation pass** (closing out the shot):
+   - Sequencer → expand the Cine Camera Actor's track.
+   - Dial in focus: either decrease **Manual Focus Distance** directly,
+     or select the Camera Component → Focus settings → enable **Draw
+     Debug Focus Plane** to see the actual focus distance visually,
+     then focus it on the pillars.
+   - Increase the current **Focal Length**.
+   - Disable the Debug Focus Plane visualization once correct.
+   - Reposition the camera, select its **Transform**, create a
+     keyframe.
+   - Set this keyframe's **interpolation** to **Linear** (right-click
+     it), and also set **Linear** as the **Default Interpolation
+     Method**.
+   - Enable **Auto Keyframe**.
+   - Go to the last frame, reposition the camera again — the end
+     keyframe is created automatically.
+   - Play back — confirms a smooth final camera move across the
+     finished environment.
+
+## Chapter 19: Rendering in high quality (Movie Render Queue)
+
+Same Movie Render Queue workflow and settings as the companion
+road/material-blending tutorial's final export step, confirmed again
+here:
+
+1. **Window → Cinematics → Movie Render Queue** (transcript renders
+   this "Movie Render Cube," a mis-transcription of "Queue").
+2. **Add** → select the actual Level Sequence ("tutorial sequence").
+3. Job **Preset/Configuration** → **Unsaved Config**.
+4. **Delete** the default JPEG Sequence output.
+5. **Settings → Anti-Aliasing**: **Temporal Sample Count** = **16**,
+   enable **Override Anti-Aliasing**.
+6. **Settings → Game Overrides**: reviewed, no changes made.
+7. **Settings → High Resolution**: enable **Override Subsurface
+   Scattering**.
+8. Choose output format: **EXR** sequence.
+9. **Output** settings: choose a save directory; resolution can be
+   changed here too.
+10. Enable **"Use Custom Frame Rate"** — generally targets **24fps**.
+11. Click **Accept**, then **Render Local** — produces an **EXR image
+    sequence**.
+12. Turning the EXR sequence into a finished video file is, again,
+    covered in a separate tutorial by the same creator (linked in the
+    original video's description) — not itself part of this video's
+    captured content.
 
 ---
 
-*To extend: send more transcript/screenshots from later parts of this
-video (finishing the falling-leaves density, the mentioned localized
-volumetric fog, and — the video's actual title topic — creating/
-importing a MetaHuman, rigging, and animating it) and this file will be
-updated.*
+The transcript ends here with what reads as a full sign-off: *"this is
+how I make my actual video... you can also download this original
+project file from my Patreon page link in my video description... till
+then take care and bye-bye,"* followed only by outro music/filler. As
+noted at the top of this file, it's unverified whether this is the end
+of the entire ~5-hour video or just this environment-building module/
+segment within it — **if MetaHuman content exists later in the same
+video, it was not captured here.**
+
+*To extend: send more transcript/screenshots if this video does
+continue into further content (MetaHuman or otherwise), or if a
+different segment of the 5-hour course gets covered separately.*
