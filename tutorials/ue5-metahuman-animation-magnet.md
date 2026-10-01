@@ -17,13 +17,15 @@ road/material-blending one in this repo) before getting to its stated
 goal of a MetaHuman character animation. Kept as its own file.
 
 Status: **partial capture** — covers landscape/water/tree setup, camera
-and lighting, a landscape sculpting pass with PCG regeneration, and a
-grass-scattering system (chapter 14). The MetaHuman-specific work (the
-video's actual stated goal) hasn't been reached yet in the transcript.
-Chapters 3-4 (landscape sculpting and the initial landscape material)
-are only partially captured — picked up already in progress — note the
-gap below. More to be added as further transcript/screenshots are
-shared.
+and lighting, landscape sculpting with PCG regeneration, grass
+scattering, PCG brush-based painting as an alternative to spline areas,
+and stone pillars + a collision-tagged rock that interacts with the
+shallow water simulation (chapter 16, cut off). The MetaHuman-specific
+work (the video's actual stated goal) hasn't been reached yet in the
+transcript. Chapters 3-4 (landscape sculpting and the initial landscape
+material) are only partially captured — picked up already in progress —
+note the gap below. More to be added as further transcript/screenshots
+are shared.
 
 ## Chapter 1: Project introduction
 
@@ -388,6 +390,93 @@ painting approach used in the other two tutorials in this repo.
      - **Scale**: Min = **1.5**, Max = **2**.
    - Press **G** to check the result; fine-tune **Edge Followup** down
      slightly afterward for better blending at the spline's edge.
+8. Click **Accept** on the PCG spline tool.
+9. **Color the grass**: Selection mode, double-click the grass asset to
+   open it → its material → **Subsurface Scattering Color Intensity** →
+   decrease the value → **Subsurface Scattering Color** → color wheel →
+   pick a green tint → apply. Save, close.
+10. Press **G** to compare the landscape with/without the grass layer —
+    confirms a big visual improvement.
+
+## Chapter 15: Foliage painting and variation
+
+A second pass of tree/grass placement, this time introducing the PCG
+**Paint** tool as an alternative to Draw Spline Surface — brush-based
+scattering (click/drag to place) rather than area-based scattering
+(draw a boundary, let it auto-fill):
+
+1. Download another grass/plant asset from Fab's **Mega Plant** library,
+   Add to Project.
+2. Disable the Static Mesh filter, enable **Skeletal Mesh** + **Blueprint
+   Class** filters.
+3. **Enable wind** on this new asset using the same wind-Blueprint
+   wrapper technique from Chapter 10 (Instance Skinned Mesh + Wind
+   Transform Provider) — now has its own wind-enabled Blueprint.
+4. **Manual placement first**: place one instance, disable all snapping,
+   press **G** to preview.
+   - **Troubleshooting — empty gaps visible on tree trunks from a
+     distance**: same issue and same fix as earlier in this video —
+     select the trees, right-click → **Asset Actions → Edit Selection
+     in [batch Nanite editor]** → **Mesh → Nanite settings** → change
+     **Shape Preservation** from **Voxalize** to **Preserve Area**.
+5. **Scatter the rest with the PCG Paint tool** instead of drawing a
+   spline:
+   - Selection mode → **PCG** → instead of Draw Spline Surface, select
+     **Paint** → choose the **scatter tool** brush.
+   - **Spawning**: enable **Spawn Actor** → **Actor Classes** → **+** →
+     add the wind-enabled tree Blueprint.
+   - **Global Transform → Absolute Global Rotation**: enable (keeps
+     trees upright regardless of terrain slope, same fix as Chapter 11).
+   - **Projection → Snap to Surface**: enable.
+   - **Random Transform**: **Random Rotation** Min = **-360**, Max =
+     **360**; **Scale** Max tried at **1.5**, then reduced to **1.2**.
+   - Paint trees directly onto the landscape by clicking/dragging with
+     the brush — a more direct, hands-on placement method than defining
+     a spline area and letting density/sampling settings fill it.
+   - Add more variety: **Actor Classes → +** → add another tree variant
+     to the same brush, continue painting.
+6. Once satisfied, click **Accept**, return to Selection mode.
+
+## Chapter 16: Stone pillars and river bank
+
+1. **Stone pillar asset**: download from Fab, Add to Project.
+2. Disable Blueprint Class/Skeletal Mesh filters, enable **Static Mesh**.
+3. Select all the pillar-pack assets at once, right-click → enable
+   **Nanite** for the whole selection.
+4. Place a pillar piece: enable **rotation snapping** at **5°**, rotate
+   to **50°**.
+5. Enable **Local** coordinate system.
+6. **Duplicate** (Alt+drag), reposition (dip down slightly for variety).
+7. Place a **beam** piece to connect pillars.
+8. Select the pillar + beam together, place, duplicate as a pair.
+9. Duplicate once more, rotate to **90°** for a different orientation.
+10. Select everything, duplicate again to build out a varied
+    arrangement; delete individual duplicates that look too repetitive;
+    lay a few pillar pieces on their side at the base for rubble-like
+    variety.
+11. **River bank ground asset**: download an **"Icelandic Terrain"**
+    pack from Fab, Add to Project, place it along the river bank,
+    decrease its scale, rotate into position.
+12. **Making this asset interact with the shallow water** (a
+    collision-tagging technique, specific to Unreal's Shallow Water
+    system):
+    - Outliner → search "shallow water river" → select it → Details
+      panel → **Collisions** tab → **Bottom Control Tag** → **Add** →
+      name a tag (tutorial uses **"Rock"**, capitalized).
+    - Copy that tag name.
+    - Select the ground/rock asset → Details panel → search "tag" →
+      **Actor Tags** → **Add** → paste the same tag name ("Rock").
+      Tagging the asset this way is what makes the shallow-water
+      simulation recognize and react to it (ripples/interaction around
+      the rock, rather than passing through it as an untagged mesh
+      would).
+    - Re-simulate: select the **Shallow Water River** actor, search
+      "reset", click **Reset** to re-run the simulation incorporating
+      the newly tagged rock.
+
+*Transcript cuts off here, right after clicking Reset — likely confirms
+the water now reacts to the tagged rock asset, then continues further
+scene dressing.*
 
 ---
 
