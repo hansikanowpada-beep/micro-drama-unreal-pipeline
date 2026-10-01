@@ -13,10 +13,10 @@ one is specifically about building a custom road/ground surface using a
 multi-layer blend material system, not character animation or Sequencer
 work. Kept as its own file per the note at the end of the other one.
 
-Status: **partial capture** — covers through character animation
-(retargeting a walk cycle) and most of a final anamorphic-style camera
-lens pass (chapter 13, cut off mid-sentence). More to be added as
-further transcript/screenshots are shared.
+Status: **complete capture** — covers the full video, start to finish:
+base environment, road + blend materials, buildings/vehicles/debris,
+infrastructure, a character with a retargeted walk animation, final
+camera lens tuning, and Movie Render Queue export.
 
 ## Chapter 1: Introduction
 
@@ -665,16 +665,73 @@ slots plus vertex-color mesh painting to control where each shows.
      - **Bloom**: enable it, change the method to **Convolution**,
        adjust **Intensity** to taste (lower intensity reads as a more
        subtle sun in frame; higher is more pronounced).
-     - **Chromatic Aberration**: enabled next, with value adjustment cut
-       off by the transcript.
+     - **Chromatic Aberration**: enable, set **Intensity** to **0.5** and
+       **Start Offset** also to **0.5** — same pattern as the other
+       tutorial, keeping the aberration confined to the frame edges
+       rather than the center.
+     - **Lens Flare**: enable — default strength is very strong, so
+       decrease **Intensity** to **0.1** for a subtler flare.
+     - **Image Effects → Vignette**: enable, add a modest amount.
+     - **Film Grain**: enable, set value to **0.5**.
+   - Reposition the Directional Light again for more interesting framing
+     once all lens effects are in.
+   - **Fog**: Outliner search "fog", increase the volumetric fog density
+     slightly for atmosphere.
+6. **Small rocks**: Content Browser → roadside construction folder →
+   disable Blueprint Class filter, enable Static Mesh filter → find rock
+   assets. Foliage tool: deselect other foliage types, select only the
+   rocks, paint them scattered around the scene.
+7. **Final camera animation recap**: place/confirm the camera, keyframe
+   its Transform at the first frame, go to the last frame, push the
+   camera forward/into the scene, keyframe again — playing back shows
+   the character's walk animation and the camera move together. Increase
+   the camera's **Aperture** once more as a final tweak.
 
-*Transcript cuts off mid-sentence here ("...we go to this chromatic
-aberration and we enable this chromatic aberration and put the...") —
-likely continues tuning the Chromatic Aberration intensity, and possibly
-moves into final rendering/export after that.*
+## Chapter 14: Rendering and export (Movie Render Queue)
+
+1. Enable the plugin first: **Edit → Plugins**, search "movie", enable
+   both **Movie Render Queue** and **Movie Render Queue Additional
+   Render Passes**. Enabling it for the first time requires an **editor
+   restart**.
+2. **Window → Cinematics → Movie Render Queue**.
+3. **Add** → select your Level Sequence (the "tutorial sequence").
+4. Under the job's **Preset/Configuration**, click **Unsaved Config**.
+5. **Delete the default JPEG Sequence** output setting.
+6. Add/configure **Anti-Aliasing**: set **Temporal Sample Count** to
+   **16**, enable **Override Anti-Aliasing**.
+7. Enable **"Use Camera Cut for Warm Up"** and **"Render Warm Up
+   Frames"** (lets the render settle/warm up before the actual frames
+   that get kept — reduces pop-in artifacts at the start).
+8. **Game Overrides** settings: left at default, no changes needed.
+9. **High Resolution** settings: enable **"Override Subsurface
+   Scattering"**.
+10. Choose the output **format** — this tutorial uses **EXR** (unlike
+    the companion environment-basics tutorial, which used PNG).
+11. **Output** settings: choose the output path/directory, resolution
+    can be changed here if needed.
+12. Enable **"Use Custom Frame Rate"** to set the render's frame rate —
+    the tutorial generally targets **24fps**.
+13. Click **Accept**, then **Render (Local)** — produces an **EXR image
+    sequence** as the output.
+14. **Turning the EXR sequence into a finished video file** is covered
+    in a separate tutorial by the same creator (linked in the original
+    video's description and via its "i" info button) — not itself part
+    of this video's content, so not captured here. See the companion
+    environment-basics tutorial's Chapter 18 for the equivalent
+    PNG-sequence-to-video compositing note (After Effects) if a
+    different approach is wanted meanwhile.
 
 ---
 
-*To extend: send more transcript/screenshots from later parts of this
-video (finishing camera lens tuning, and the final rendering/export
-step) and this file will be updated.*
+**This completes the full tutorial workflow** captured from this video:
+quick base environment setup → custom road mesh with a multi-layer blend
+material (Unreal Senzi) → moss/dirt/puddle texture layering via
+mesh-paint vertex-color channels → foot paths → ruined buildings as
+reusable Level Instances (with ivy foliage painted on vertical surfaces
+and a cross-project asset migration) → environmental debris → ruined
+vehicles (material duplication + weathering + puddles) → scene-wide
+widening pass → infrastructure (railings, barriers, cones, electric
+lines, street lamps with a pivot-point fix) → a character with a
+retargeted walk animation → final camera lens tuning (anamorphic squeeze,
+bloom, chromatic aberration, lens flare, vignette, film grain) → Movie
+Render Queue export to an EXR sequence.
