@@ -26,15 +26,14 @@ node-graph fundamentals, migrating assets (chapter 6-7), a finished
 complete score UI (chapter 10), graph organization tools (chapter 11),
 dynamic target counting plus a working win condition (chapter 12), a
 complete `WBP_EndScreen` (chapter 13), a fully working countdown timer
-and lose condition (chapter 14), and a complete `BP_Rifle` weapon
-Blueprint — spawn/attach, a Fire custom event wired to input via a
-Promote to Variable reference, muzzle-point spawning via an Arrow
-component, recoil animation, sound, and a Niagara muzzle flash
-(chapter 15). Chapter 16 has just started a custom `BP_Bullets`
-projectile (collision, visual mesh, Projectile Movement component),
-cut off right as its speed values are being set. This is the last
-batch sent so far — Chaos physics destruction and final environment
-assembly haven't been covered yet.
+and lose condition (chapter 14), a complete `BP_Rifle` weapon
+Blueprint (chapter 15), and a complete custom `BP_Bullets` projectile
+— emissive tracer, correct collision/destroy-on-hit, spark/bullet-hole
+impact VFX, and a fix so bullets fire toward the crosshair (camera
+rotation) rather than drifting with the recoil animation (chapter 16).
+Chapter 17 (Chaos Physics destruction) has just started with a basic
+physics-simulation primer, cut off almost immediately. Final
+environment assembly hasn't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -1386,16 +1385,136 @@ Graph tab, not just the static Designer view):
    alone only detects hits, it doesn't move the actor). It asks for an
    **Initial Speed** and a **Max Speed** value.
 
-*Transcript cuts off here, right as the Projectile Movement component's
-speed values are about to be set ("if we put in...") — likely continues
-tuning bullet speed, setting up the tracer's lifespan/auto-destroy
-timer, and wiring its own hit-detection logic (presumably replacing the
-Cast-To-Projectile check in `BP_Target` with a check against this new
-`BP_Bullets` class).*
+7. **Setting speed and confirming direction**: set both Initial Speed
+   and Max Speed to **500** initially. Play — the bullet fires correctly
+   toward the gun's facing direction.
+   - **Why it goes that direction**: the spawn rotation comes from the
+     **Arrow's rotation** — back in `BP_Rifle`, `Get Arrow → Get World
+     Transform → Break` exposes the Arrow's rotation separately, which
+     becomes the spawned bullet's own rotation; Projectile Movement
+     then propels the actor forward along *its own* facing direction.
+8. **Troubleshooting — bullet scale gets distorted unexpectedly**:
+   caused by the Arrow's *scale* also being included in that same World
+   Transform fed into Spawn Actor. If the Arrow had ever been resized
+   via the viewport's Scale gizmo, that scale value carries over and
+   distorts the bullet.
+   - **Fix**: don't scale the Arrow with the viewport gizmo — instead
+     type scale values directly into the Arrow's Details panel fields,
+     which doesn't feed into the spawn transform's scale the same way.
+9. Increase speed well beyond the test value — **13,000** for a
+   convincingly fast, bullet-like travel speed (tune to taste for a
+   faster/slower feel).
+10. **Troubleshooting — "looks great but doesn't feel like a bullet"**:
+    missing the glow real tracers have. **Fix — emissive material**:
+    the downloaded Sci-Fi Weapons pack includes **`M_Emissive_Bullets`**
+    in its Materials folder — select the bullet's Sphere mesh, drag
+    this material onto its material slot.
+    - The material itself is simple: just a Color value plugged
+      straight into **Emissive Color**. (The creator references a
+      separate dedicated video of their own on materials/environment
+      design for more depth — almost certainly the companion
+      `ue5-starter-course-unrealsensei.md` already captured in this
+      repo, which **confirms both videos are from the same channel**,
+      Unreal Sensei.)
+    - Play — the bullet now glows convincingly, "feels like a bullet."
+11. **Troubleshooting — firing doesn't register hits on targets**: open
+    `BP_Target` (Ctrl+E on a placed instance) — its existing `Cast To`
+    node still checks for the **old** stock projectile class, not the
+    new `BP_Bullets`.
+    - **Fix**: delete that Cast To node, drag from `On Component Hit`'s
+      **Other Actor** pin again, add `Cast To BP_Bullets` instead.
+    - Still doesn't register after this — **second issue**:
+      `BP_Bullets`' own collision isn't configured correctly. The
+      visual Sphere mesh should **not** collide with anything itself
+      (it's "just there to make our bullet look more aesthetic"); the
+      dedicated Collision (sphere) component should handle actual hit
+      detection. Set the Collision component's preset to **"Block
+      All"**, and confirm the visual Sphere mesh is set to **No
+      Collision**.
+    - Re-tested: hitting targets now correctly increments score.
+12. **Troubleshooting — the bullet doesn't disappear on impact**, just
+    sits there oddly (fine for something like an arrow sticking into a
+    surface, wrong for a bullet). **Fix**: in `BP_Bullets`' Event Graph,
+    find its `Hit` event (the component-hit equivalent for this actor),
+    drag from it → **"Destroy Actor"** — removes the bullet immediately
+    on impact.
+13. **Impact VFX (sparks + bullet hole) before destroying**: right
+    before the `Destroy Actor` call:
+    - Drag → **"Spawn System at Location"** (not *Attached* this time —
+      this is a one-off effect at a fixed world point, not something
+      that needs to track a moving component).
+    - System = another bundled Niagara effect: Sci-Fi Weapons → Effects
+      → **`P_Projectile_Sparks`**.
+    - **Location**: drag from the `Hit` event's own output, add
+      **"Break Hit Result"** — exposes many sub-values about the
+      collision (hit component, hit actor, etc.) — drag out its
+      **Location** sub-pin into Spawn System's Location input.
+    - **Rotation**: drag out Break Hit Result's **Impact Normal**
+      sub-pin (a vector describing the hit surface's facing direction)
+      — Spawn System needs a Rotation, not a Vector, so Unreal
+      auto-offers a vector-to-rotation conversion node; accept it.
+14. Play — firing at a wall now produces sparks flying out correctly
+    perpendicular to the wall surface, plus a bullet hole effect, and
+    the bullet itself is destroyed right after. Multiple shots leave
+    multiple distinct holes/spark bursts — "looks pretty nice." Full
+    win-condition retest (4 targets) also still works correctly: "our
+    gun and our bullet feels a lot nicer than the default unreal
+    weapon."
+15. **New bug — bullets don't go where the crosshair points**: instead
+    of flying toward the exact center of the screen, they drift
+    somewhat randomly depending on the gun's current recoil-animation
+    pose at the moment of firing.
+    - **Root cause**: `BP_Rifle`'s `Fire` event spawns the bullet using
+      the **Arrow's rotation**, and the Arrow is a child of the gun
+      mesh — so whenever the recoil animation tilts the gun, the Arrow
+      (and the bullet's firing direction) tilts with it too, producing
+      an unintended "the more you fire, the less accurate" spread.
+      Explicitly noted this *could* be a desirable mechanic in another
+      game (recoil control, CS:GO-style), but isn't wanted here.
+16. **Fix — aim from the camera's rotation, not the gun's animated
+    pose**: the camera's facing direction *is* the crosshair's exact
+    aim point, since the crosshair always sits at the dead center of
+    the screen.
+    - `Get Player Character` → `Cast To BP_FirstPersonCharacter` → get
+      its **Camera** component → **`Get World Rotation`** (rotation
+      only this time, not the full Transform, since only the direction
+      needs replacing).
+    - Still need the bullet to **spawn at the muzzle**, though (not at
+      the camera's own position) — so separately: `Get Arrow → Get
+      World Location` (location only, not the full transform).
+    - Combine both into one Transform for Spawn Actor: add a **"Make
+      Transform"** node, plug the Arrow's Location into its Location
+      input and the Camera's Rotation into its Rotation input (Scale
+      left default). Delete the old `Get World Transform` call on the
+      Arrow, no longer needed.
+17. Play — bullets now travel exactly toward the crosshair regardless
+    of the gun's recoil animation, and the earlier accuracy-drift
+    problem is gone. (Design note repeated: this trades away a
+    recoil-control mechanic some games intentionally keep, in favor of
+    consistent center-screen accuracy, which was the goal here.)
+
+## Chapter 17: Chaos Physics (partial — cut off mid-setup)
+
+1. **Motivation**: hitting a target currently gives the player no
+   visual feedback beyond checking their score — the target itself
+   doesn't react. Plan: use **Chaos Physics** (Unreal's physics engine)
+   to break the target apart into multiple fragments on hit, mimicking
+   how a fast-moving object shattering another object looks in
+   reality.
+2. **Physics basics primer** (before building the real destruction
+   logic): drag in a test static mesh (`SM_Targets`), duplicate a few
+   copies, press Play.
+   - By default, newly placed objects in Unreal are **not** physically
+     simulated at all — they simply float in space with no physics
+     applied unless it's explicitly turned on.
+
+*Transcript cuts off here, right at the start of the physics basics
+primer — likely continues into enabling "Simulate Physics" on an
+object, then into Chaos Fracture settings for breaking the target into
+pieces.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the bullet tracer, updating `BP_Target`'s hit check for
-the new projectile class, Chaos physics destruction, and adding the
-finished game to an environment) and this file will be updated.*
+video (finishing Chaos Physics destruction, and adding the finished
+game to an environment) and this file will be updated.*
