@@ -13,10 +13,9 @@ one is specifically about building a custom road/ground surface using a
 multi-layer blend material system, not character animation or Sequencer
 work. Kept as its own file per the note at the end of the other one.
 
-Status: **partial capture** — covers through widening the whole scene
-layout and starting the landscape material (chapter 10, cut off
-mid-sentence). More to be added as further transcript/screenshots are
-shared.
+Status: **partial capture** — covers through placing street lamps with
+a pivot-point fix (chapter 12, cut off mid-sentence). More to be added
+as further transcript/screenshots are shared.
 
 ## Chapter 1: Introduction
 
@@ -477,13 +476,99 @@ slots plus vertex-color mesh painting to control where each shows.
 10. **Landscape material**: apply the same **Mossy** material (Fab →
     Mega Scans → Surfaces) to the base landscape too, so exposed ground
     beyond the road/props reads consistently with everything else.
+    - Select the landscape, go to its Details panel, drag the Mossy
+      material directly onto its **material slot**.
+11. Scatter a few more buildings around to fill gaps.
 
-*Transcript cuts off mid-sentence here ("...so we go to this fab folder
-and we go to the mega scans folder. Go to the surfaces.") — likely
-continues finishing the landscape material application.*
+## Chapter 11: Infrastructure and set dressing
+
+1. **Railings along the foot paths**: download a railing asset and a
+   **"roadside construction"** asset pack from Fab, Add to Project.
+2. **Rail Kit** placement:
+   - Place the rail kit piece, rotate it into position (note: the
+     transcript's audio says "press W to get this rotation gizmo" here
+     — this conflicts with the W=Move/E=Rotate/R=Scale convention
+     established in the other tutorial; likely a verbal slip by the
+     narrator rather than an actual different keybinding, but confirm
+     against your own install rather than assuming).
+   - Increase its scale slightly.
+   - **Duplicate** (Alt+drag) multiple times along the path, bending
+     some copies slightly for a less mechanically-straight line.
+   - Delete railing segments from a side where they aren't wanted.
+3. **Rubble/debris from the roadside construction pack**: place a piece,
+   apply the existing **Mossy** material to it the same way as other
+   props (select an asset that already has it, Details panel →
+   magnifying-glass **locate material** button, then apply that same
+   material instance here), increase scale slightly, and duplicate
+   multiple times to fill out the area.
+4. **More ivy foliage**: Selection mode → **Foliage**, select the ivy
+   assets, decrease brush size, set **Density** to **800**, paint over
+   the newly added railing/rubble area.
+   - **Troubleshooting — visible seams between pieces**: where separate
+     asset pieces meet, visible seams showed. Fix by placing another
+     small asset directly over the seam, applying the same material,
+     and scaling it to bridge the gap — hides the seam.
+5. **More root assets**: Assembly folder (enable Blueprint Class
+   filter), reuse the same root asset used on the buildings, place it,
+   raise it slightly, rotate, and duplicate it multiple times — the
+   tutorial notes the scene starts to look "very vegetated" at this
+   point.
+6. **Lighting polish pass**:
+   - Reposition the Directional Light (**Ctrl+L**) so the sun itself is
+     actually visible/framed in the scene, not just its lighting effect.
+   - Select the Directional Light via the Outliner, increase its
+     **Source Angle** for a softer-edged shadow.
+   - Find the **Volumetric Fog** settings (via Outliner search) and
+     decrease the fog **density** slightly.
+   - Increase the camera's **Aperture** again as part of this pass.
+7. **Concrete barriers**: Content Browser → roadside construction folder
+   → disable Blueprint Class filter, enable Static Mesh filter → finds
+   a concrete barrier asset.
+   - Place it, rotate it — it looks too new by default, so apply the
+     same **Mossy** material (locate-and-apply pattern as before).
+   - Increase scale slightly, then duplicate multiple times along the
+     road, rotating each copy randomly for variation.
+8. A small detail: adds foliage on top of a parked bus's roof (from the
+   same Assembly/Blueprint-filtered folder used for roots/ivy earlier).
+9. **Road cones**: more assets from the roadside construction folder —
+   place road cone props around the scene.
+
+## Chapter 12: Final detailing (partial — cuts off mid-duplication)
+
+1. **Street lamp / light post**: download a separate lamp post asset,
+   Add to Project. After download, open its folder, enable the Static
+   Mesh filter, find the lamp post mesh.
+2. Drag it into the scene — two problems immediately apparent:
+   - It's far too large by default.
+   - Its **anchor/pivot point sits in the middle of the mesh** rather
+     than at its base, which makes it awkward to position correctly on
+     the ground.
+3. **Fixing the pivot point** (a genuinely reusable technique for any
+   mesh whose origin is in the wrong place):
+   - Select the asset, Selection mode → **Modeling** → the **X Form**
+     tool → **Edit Pivot**.
+   - Set the pivot point to the **bottom** of the mesh, offset it as
+     needed, then **Accept**.
+   - Back in normal Select mode, the asset now scales/rotates/positions
+     correctly from its base rather than its center.
+4. Place the lamp post, decrease its scale to a sensible size, rotate it
+   to face the right direction.
+5. **Material**: Fab folder → disable Static Mesh filter → Mega Scans →
+   Surfaces → enable the materials-type filter ("metal instance" filter)
+   → find a rusty metal material and apply it to the lamp post's pole.
+   Apply the same **Mossy** material to the lamp head/fixture part.
+6. **Ivy on the lamp post**: Foliage section, deselect the two ivy
+   variants not wanted here, keep just one selected, decrease brush size
+   to **50** (much smaller than the building/ground passes — appropriate
+   for a thin pole), paint ivy climbing up the post.
+7. Duplicate the finished lamp post multiple times along the road.
+
+*Transcript cuts off mid-sentence here ("...we place it here and we
+duplicate it over here.") — likely continues placing more lamp posts
+and finishing final detailing.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the landscape material, any further lighting, or final
+video (finishing final detailing, any further lighting, or final
 export/rendering) and this file will be updated.*
