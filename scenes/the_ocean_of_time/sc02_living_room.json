@@ -1,0 +1,23 @@
+{
+  "scene_id": "toot_sc02_living_room",
+  "episode": "the_ocean_of_time",
+  "int_ext": "INT",
+  "location": "Sharma Estate - Living Room",
+  "time_of_day": "DAY",
+  "characters": [
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"},
+    {"cast_id": "mr_sharma", "role": "Mr. Sharma", "age": "50s"},
+    {"cast_id": "mrs_sharma", "role": "Mrs. Sharma", "age": "50s"}
+  ],
+  "camera": "medium_shot",
+  "lighting_notes": "Formal interior light — neutral/cool, not warm, to match the rigid/orthodox tone. Mr. and Mrs. Sharma seated on antique mahogany chairs; Ananya standing, so a slightly low-angle medium shot on the parents and eye-level or slightly elevated on Ananya would reinforce the power dynamic.",
+  "action": "Ananya stands before her seated parents. Mrs. Sharma gasps softly at Ananya's line; Mr. Sharma's eyes narrow. Silence, then his rigid posture eases into reluctant acceptance.",
+  "dialogue": [
+    {"character": "mr_sharma", "parenthetical": "Firm", "line": "The family has prestige to uphold, Ananya. We have chosen a suitable match."},
+    {"character": "ananya", "parenthetical": "Softly, but resolute", "line": "Father... I have already given my heart to someone."},
+    {"character": "ananya", "parenthetical": null, "line": "His name is Rohit. We studied together. He is honest and kind. Please... meet him once."}
+  ],
+  "narration": [],
+  "duration_estimate_seconds": 25,
+  "continuity_notes": "First appearance of all three characters. Establishes Mr. Sharma's rigidity and Ananya's quiet resolve — both payoff later in sc08's disownment scene, which reuses this same location."
+}

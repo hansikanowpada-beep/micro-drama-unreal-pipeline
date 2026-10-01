@@ -1,0 +1,30 @@
+{
+  "scene_id": "toot_sc09_apartment_climax",
+  "episode": "the_ocean_of_time",
+  "int_ext": "INT",
+  "location": "Rohit's Apartment",
+  "time_of_day": "NIGHT",
+  "characters": [
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"},
+    {"cast_id": "rohit", "role": "Rohit", "age": "20s"}
+  ],
+  "camera": "medium_shot",
+  "lighting_notes": "Dark living room, matching sc04's apartment but now entirely unlit/hostile — minimal practical light, heavy shadow. This is the darkest scene in the episode tonally and visually.",
+  "action": "Ananya sits huddled on the floor, small suitcase beside her. Rohit enters, slams the door, face twisted in fury. The confrontation escalates until Rohit grabs a heavy wooden decorative club from a nearby stand and swings it down with brutal force at Ananya.",
+  "dialogue": [
+    {"character": "rohit", "parenthetical": null, "line": "Your father called me. He disowned you completely! Not a single cent of their wealth is coming to you!"},
+    {"character": "ananya", "parenthetical": "Broken", "line": "Rohit... I know about Priya. I know you never loved me."},
+    {"character": "rohit", "parenthetical": "Laughs harshly", "line": "Loved you? You think I spent a single second caring about you? You were my ticket out of poverty! And now? You're useless to me. No inheritance... and you can't even bear an heir!"},
+    {"character": "ananya", "parenthetical": "Defiant through tears", "line": "You monster... I'm leaving. Everyone will know what you did—"},
+    {"character": "rohit", "parenthetical": null, "line": "No one is going to know anything."},
+    {"character": "ananya", "parenthetical": null, "line": "Rohit, no—!"}
+  ],
+  "narration": [],
+  "duration_estimate_seconds": 35,
+  "shot_list": [
+    {"camera": "wide_shot", "description": "Ananya huddled on the floor, suitcase beside her, establishing her isolation and vulnerability"},
+    {"camera": "medium_shot", "description": "Rohit entering, the escalating dialogue exchange"},
+    {"camera": "close_up", "description": "Ananya's face on 'Rohit, no—!' — the scene ends on her, not on graphic violence"}
+  ],
+  "continuity_notes": "Sensitive content — the climax of the story. Recommend handling the final blow off-screen or via a hard cut/fade rather than depicting impact directly (matches the script's own restraint — it ends on Ananya's horrified reaction line, then 'FADE TO BLACK', not on the strike itself). Production note: this is the episode's most consequential scene for tone — coordinate pacing/music/sound design choices with the overall project's intent before animating."
+}

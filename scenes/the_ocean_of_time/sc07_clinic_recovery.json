@@ -1,0 +1,21 @@
+{
+  "scene_id": "toot_sc07_clinic_recovery",
+  "episode": "the_ocean_of_time",
+  "int_ext": "INT",
+  "location": "Clinic - Recovery Room",
+  "time_of_day": "DAY",
+  "characters": [
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"},
+    {"cast_id": "doctor", "role": "Doctor", "age": "40s"}
+  ],
+  "camera": "close_up",
+  "lighting_notes": "Softer than the operating room but still clinical — slightly warmer to mark the time shift ('LATER'), but keep it muted, not comforting. Doctor's face needs to read as 'pale and grave' — a cooler rim/fill on him specifically would help sell that.",
+  "action": "Ananya wakes up. The Doctor stands beside her bed, his face pale and grave. He delivers the news. A tear falls silently down Ananya's cheek.",
+  "dialogue": [
+    {"character": "doctor", "parenthetical": null, "line": "There was a severe surgical complication during the procedure. Your uterine wall ruptured."},
+    {"character": "doctor", "parenthetical": "CONT'D", "line": "To save your life... we had no choice but to perform an emergency hysterectomy. Your uterus was removed. I am so sorry."}
+  ],
+  "narration": [],
+  "duration_estimate_seconds": 15,
+  "continuity_notes": "Key plot turn — this complication is the detail Mr. Sharma reacts to in sc08 ('a secret procedure that leaves you sterile'). The single silent tear is the only physical performance beat; needs a clean, held close_up, no camera movement, to land."
+}

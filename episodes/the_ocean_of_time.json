@@ -1,0 +1,34 @@
+{
+  "episode_id": "the_ocean_of_time",
+  "title": "The Ocean of Time",
+  "format": "Short Screenplay (5 pages)",
+  "scenes": [
+    "scenes/the_ocean_of_time/sc01_estate_exterior.json",
+    "scenes/the_ocean_of_time/sc02_living_room.json",
+    "scenes/the_ocean_of_time/sc03_wedding_mandap.json",
+    "scenes/the_ocean_of_time/sc04_apartment_night.json",
+    "scenes/the_ocean_of_time/sc05_downtown_cafe.json",
+    "scenes/the_ocean_of_time/sc06_clinic_operating.json",
+    "scenes/the_ocean_of_time/sc07_clinic_recovery.json",
+    "scenes/the_ocean_of_time/sc08_study_confrontation.json",
+    "scenes/the_ocean_of_time/sc09_apartment_climax.json",
+    "scenes/the_ocean_of_time/sc10_coastline_epilogue.json"
+  ],
+  "characters": [
+    {"cast_id": "ananya", "name": "Ananya", "age_range": "20s", "description": "Gentle, idealistic, and deeply loyal."},
+    {"cast_id": "rohit", "name": "Rohit", "age_range": "20s", "description": "Calculating, charming on the surface, ruthless underneath."},
+    {"cast_id": "mr_sharma", "name": "Mr. Sharma", "age_range": "50s", "description": "Orthodox, tradition-bound, rigid head of the family."},
+    {"cast_id": "mrs_sharma", "name": "Mrs. Sharma", "age_range": "50s", "description": "Bound by societal reputation and orthodox values."},
+    {"cast_id": "doctor", "name": "Doctor", "age_range": "40s", "description": "Clinical, tasked with delivering grave news."},
+    {"cast_id": "priya", "name": "Priya", "age_range": "20s", "description": "Rohit's secret girlfriend."}
+  ],
+  "locations": [
+    "Sharma Estate (exterior, living room, study)",
+    "Wedding Mandap",
+    "Rohit & Ananya's Apartment",
+    "Downtown Cafe",
+    "Clinic (operating room, recovery room)",
+    "Barren Coastline"
+  ],
+  "status": "scene breakdown complete; no character or environment assets built yet (see PIPELINE_STATUS.md)"
+}

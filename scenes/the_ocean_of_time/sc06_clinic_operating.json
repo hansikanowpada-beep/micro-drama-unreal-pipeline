@@ -1,0 +1,21 @@
+{
+  "scene_id": "toot_sc06_clinic_operating",
+  "episode": "the_ocean_of_time",
+  "int_ext": "INT",
+  "location": "Clinic - Operating Room",
+  "time_of_day": "DAY",
+  "characters": [
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"},
+    {"cast_id": "doctor", "role": "Doctor", "age": "40s"}
+  ],
+  "camera": "close_up",
+  "lighting_notes": "Bright, sterile, clinical — cool white light, high Exposure Compensation, minimal shadow softness (small Source Angle on key light) for a harsh medical-setting feel, deliberately uncomfortable rather than cinematic-warm.",
+  "action": "Ananya lies on an operating table, looking terrified as the Doctor prepares the procedure.",
+  "dialogue": [
+    {"character": "doctor", "parenthetical": null, "line": "Are you certain about this, Mrs. Sharma?"},
+    {"character": "ananya", "parenthetical": "Voice shaking", "line": "Yes. Please... just get it over with."}
+  ],
+  "narration": [],
+  "duration_estimate_seconds": 10,
+  "continuity_notes": "Short, tense beat. Doctor addresses her as 'Mrs. Sharma' — confirms she still carries the married name at this point, before the disownment in sc08."
+}

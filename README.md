@@ -8,9 +8,21 @@ other.
 
 See [PIPELINE.md](PIPELINE.md) for the proposed tool-by-tool mapping.
 
+## Contents
+
+- `tutorials/` — step-by-step notes captured from UE5 tutorial videos
+  (environment building, road/material blending, landscape/water/foliage,
+  MetaHuman performance capture, and FPS game creation with Blueprints).
+- `scripts/`, `scenes/`, `episodes/` — screenplay content broken down into
+  the pipeline's scene format. See [SCENE_FORMAT.md](SCENE_FORMAT.md) for
+  the schema and what's still open before any of it can actually be
+  produced. First episode: "The Ocean of Time."
+
 ## Status
 
-Nothing here has been built or tested yet. This repository starts as
-documentation only; scripts will be added incrementally as each tool is
-installed and verified, following the same approach used for the Blender
-repository.
+No Unreal-side automation has been built or tested yet — the engine
+install/tool setup is in progress (see `tutorials/`). This repository
+started as documentation only; scene-content planning has since begun
+(see `SCENE_FORMAT.md`), and scripts will be added incrementally as each
+tool is installed and verified, following the same approach used for the
+Blender repository.

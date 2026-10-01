@@ -1,0 +1,25 @@
+{
+  "scene_id": "toot_sc05_downtown_cafe",
+  "episode": "the_ocean_of_time",
+  "int_ext": "EXT",
+  "location": "Downtown Cafe",
+  "time_of_day": "DAY",
+  "characters": [
+    {"cast_id": "rohit", "role": "Rohit", "age": "20s"},
+    {"cast_id": "priya", "role": "Priya", "age": "20s"},
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"}
+  ],
+  "camera": "medium_shot",
+  "lighting_notes": "Ordinary bright daylight for Rohit/Priya's table (contrast with Ananya's isolation beat). When cutting to Ananya across the street, consider slightly desaturated/cooler grading via Post Process to visually separate her emotional state from the warm cafe table.",
+  "action": "Rohit sits at an outdoor table, laughing warmly, holding hands with Priya. Across the street, Ananya stands holding a small pharmacy bag, watching. Her eyes fill with tears as she sees Rohit kiss Priya's cheek. She steps back into an alleyway, pulls out a positive pregnancy test, stares at it, chest heaving with silent sobs.",
+  "dialogue": [],
+  "narration": [],
+  "duration_estimate_seconds": 22,
+  "shot_list": [
+    {"camera": "medium_shot", "description": "Rohit and Priya at the cafe table, laughing, hand-holding"},
+    {"camera": "wide_shot", "description": "Establishes the street gap between the cafe table and Ananya's position"},
+    {"camera": "close_up", "description": "Ananya's face as she watches the kiss"},
+    {"camera": "close_up", "description": "The alleyway — pregnancy test reveal, her silent sobbing"}
+  ],
+  "continuity_notes": "No dialogue — fully performance/reaction-driven. The pregnancy test prop needs to read clearly on camera since it's the scene's key information beat, setting up sc06/sc07."
+}

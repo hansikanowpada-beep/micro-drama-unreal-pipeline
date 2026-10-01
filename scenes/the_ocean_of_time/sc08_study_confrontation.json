@@ -1,0 +1,28 @@
+{
+  "scene_id": "toot_sc08_study_confrontation",
+  "episode": "the_ocean_of_time",
+  "int_ext": "INT",
+  "location": "Sharma Estate - Study",
+  "time_of_day": "DAY",
+  "characters": [
+    {"cast_id": "mr_sharma", "role": "Mr. Sharma", "age": "50s"},
+    {"cast_id": "mrs_sharma", "role": "Mrs. Sharma", "age": "50s"},
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"}
+  ],
+  "camera": "medium_shot",
+  "lighting_notes": "Harder, colder version of sc02's living room lighting — same estate, but the warmth (if any) from sc02 should be gone. Consider a slightly low-key setup with Mr. Sharma strongly lit/dominant in frame and Mrs. Sharma partially in shadow (she 'turns her back in disgrace').",
+  "action": "Mr. Sharma slams a document onto his desk. Mrs. Sharma turns her back in disgrace. Ananya ends up crying, kneeling.",
+  "dialogue": [
+    {"character": "mr_sharma", "parenthetical": "Trembling with rage", "line": "An abortion? A secret procedure that leaves you sterile? You brought utter dishonor upon this family name!"},
+    {"character": "ananya", "parenthetical": "Crying, kneeling", "line": "Father, please! He was cheating on me! I had no choice—"},
+    {"character": "mr_sharma", "parenthetical": null, "line": "You chose him over us! Now you have ruined our lineage and reputation. You are no longer a daughter of this house. Leave!"}
+  ],
+  "narration": [],
+  "duration_estimate_seconds": 25,
+  "shot_list": [
+    {"camera": "close_up", "description": "The document slamming onto the desk"},
+    {"camera": "medium_shot", "description": "Mr. Sharma's tirade, Mrs. Sharma turned away in the background"},
+    {"camera": "close_up", "description": "Ananya kneeling, pleading, breaking down"}
+  ],
+  "continuity_notes": "Mirrors sc02 in the same estate — stage this as a deliberate visual callback (same room type, inverted outcome: acceptance in sc02 becomes rejection here). Final line 'Leave!' is the scene's button; hold on Ananya's reaction rather than cutting immediately."
+}

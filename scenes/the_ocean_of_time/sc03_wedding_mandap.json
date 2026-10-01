@@ -1,0 +1,23 @@
+{
+  "scene_id": "toot_sc03_wedding_mandap",
+  "episode": "the_ocean_of_time",
+  "int_ext": "INT",
+  "location": "Wedding Mandap",
+  "time_of_day": "NIGHT",
+  "characters": [
+    {"cast_id": "rohit", "role": "Rohit", "age": "20s"},
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"},
+    {"cast_id": "wedding_guests", "role": "Background wedding guests", "note": "crowd fill — could reuse the road/material tutorial's 'Create Level Instance' technique for a repeated-but-varied seated crowd"}
+  ],
+  "camera": "wide_shot",
+  "lighting_notes": "Traditional wedding decorations, flashing camera lights (practical-light flicker — could reuse the Light Function flicker material documented in ue5-metahuman-performance-capture-magnet.md Chapter 13 for the camera-flash effect). Warm, celebratory key light.",
+  "action": "Rohit in wedding attire, smiling warmly for the guests. Ananya sits beside him, radiantly happy. A subtler beat needed on a tighter shot: behind Rohit's smiling facade, his eyes subtly glance around at the luxurious estate and jewel-encrusted decor, taking mental inventory — this beat needs its own close_up insert, not just the wide establishing shot.",
+  "dialogue": [],
+  "narration": [],
+  "duration_estimate_seconds": 15,
+  "shot_list": [
+    {"camera": "wide_shot", "description": "Full mandap, both characters, guests, decorations"},
+    {"camera": "close_up", "description": "Rohit's eyes glancing at the estate/jewels — the 'tell' shot revealing his real motive, important for later payoff in sc09"}
+  ],
+  "continuity_notes": "No dialogue, performance/expression-driven scene. The close_up insert on Rohit is the scene's most important beat dramatically — don't let the wide shot be the only coverage."
+}

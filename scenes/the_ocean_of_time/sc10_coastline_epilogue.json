@@ -1,0 +1,22 @@
+{
+  "scene_id": "toot_sc10_coastline_epilogue",
+  "episode": "the_ocean_of_time",
+  "int_ext": "EXT",
+  "location": "Barren Coastline / Sky",
+  "time_of_day": "DAWN",
+  "characters": [],
+  "camera": "wide_shot",
+  "lighting_notes": "Pale, melancholic gray sky transitioning into a blazing sunrise — this is a two-beat lighting change within one scene: start with low Directional Light intensity and a desaturated/cool Post Process grade, then raise intensity and warm the grade as the sun rises in the second beat. Good candidate for the companion Starter Course tutorial's dusk/dawn Directional Light repositioning technique (Ctrl+L).",
+  "action": "A fresh, unmarked mound of dirt rests near the shore, completely isolated — Ananya's grave. Then: the sun rises high over the horizon, casting harsh light over the ocean and the grave.",
+  "dialogue": [],
+  "narration": [
+    {"line": "She rests now in her quiet tomb, submerged beneath an endless ocean called Time. The world moved on, and all forgot her name."},
+    {"line": "Only the Sun God above remains her eternal witness."}
+  ],
+  "duration_estimate_seconds": 18,
+  "shot_list": [
+    {"camera": "wide_shot", "description": "EXT. BARREN COASTLINE - DAWN — the unmarked grave, isolated, pale gray sky, narration line 1"},
+    {"camera": "wide_shot", "description": "EXT. SKY - CONTINUOUS — the sun rising, harsh light over ocean and grave, narration line 2, then FADE OUT"}
+  ],
+  "continuity_notes": "Closing scene, narrator V.O. only, no on-screen characters. Gives the episode's title ('The Ocean of Time') its visual payoff — make sure the ocean itself is prominent in frame, not just the grave mound. Ends the episode on FADE OUT."
+}

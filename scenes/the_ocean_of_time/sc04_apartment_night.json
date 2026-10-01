@@ -1,0 +1,26 @@
+{
+  "scene_id": "toot_sc04_apartment_night",
+  "episode": "the_ocean_of_time",
+  "int_ext": "INT",
+  "location": "Rohit & Ananya's Apartment - Dining Area",
+  "time_of_day": "NIGHT",
+  "characters": [
+    {"cast_id": "ananya", "role": "Ananya", "age": "20s"},
+    {"cast_id": "rohit", "role": "Rohit", "age": "20s"}
+  ],
+  "camera": "medium_shot",
+  "lighting_notes": "Dim, isolated lighting — a single practical light over the dining table, rest of the apartment dark. Low Directional/Sky Light intensity, no fill, to emphasize Ananya's loneliness. A visible wall clock reading past 2:00 AM is a key prop — needs its own insert shot.",
+  "action": "Ananya sits alone at a dimly lit table; a cooked meal sits cold. She stares at the clock ticking past 2:00 AM. The front door unlocks — Rohit enters, adjusting his jacket, glances at her with utter indifference, skips any greeting, walks straight to the bedroom, leaving her in silence.",
+  "dialogue": [
+    {"character": "ananya", "parenthetical": "Quietly", "line": "You didn't answer my calls again."},
+    {"character": "rohit", "parenthetical": null, "line": "I was busy. Don't crowd me."}
+  ],
+  "narration": [],
+  "duration_estimate_seconds": 20,
+  "shot_list": [
+    {"camera": "wide_shot", "description": "Ananya alone at the table, establishes the isolation"},
+    {"camera": "close_up", "description": "Clock ticking past 2:00 AM"},
+    {"camera": "medium_shot", "description": "Rohit entering, the brief exchange, his exit to the bedroom"}
+  ],
+  "continuity_notes": "First appearance of the apartment location, reused again in sc09 for the climax. Establishes Rohit's coldness before sc05 reveals why."
+}
