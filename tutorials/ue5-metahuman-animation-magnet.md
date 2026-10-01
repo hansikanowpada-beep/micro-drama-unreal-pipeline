@@ -16,13 +16,14 @@ fundamentals, distinct from both the environment-basics tutorial and the
 road/material-blending one in this repo) before getting to its stated
 goal of a MetaHuman character animation. Kept as its own file.
 
-Status: **partial capture** — covers landscape/water/tree setup through
-a full PCG-based procedural tree-scattering workflow (chapter 11). The
-MetaHuman-specific work (the video's actual stated goal) hasn't been
-reached yet in the transcript. Chapters 3-4 (landscape sculpting and the
-initial landscape material) are only partially captured — picked up
-already in progress — note the gap below. More to be added as further
-transcript/screenshots are shared.
+Status: **partial capture** — covers landscape/water/tree setup, camera
+and lighting, a landscape sculpting pass with PCG regeneration, and a
+grass-scattering system (chapter 14). The MetaHuman-specific work (the
+video's actual stated goal) hasn't been reached yet in the transcript.
+Chapters 3-4 (landscape sculpting and the initial landscape material)
+are only partially captured — picked up already in progress — note the
+gap below. More to be added as further transcript/screenshots are
+shared.
 
 ## Chapter 1: Project introduction
 
@@ -279,6 +280,114 @@ painting approach used in the other two tutorials in this repo.
     new spline area elsewhere in the scene → Accept → back to Selection
     mode. Same tree variety and randomization now applies to this new
     area without re-entering any settings.
+
+## Chapter 12: Camera and lighting look
+
+1. Place Actors panel → **Cinematics** → **Cine Camera Actor**.
+2. Sequencer tab → **Create new Level Sequence**, name it "tutorial
+   sequence", **Save**.
+3. Bring the camera into the sequence/scene: find it in the Outliner,
+   reposition it, delete its default keyframes.
+4. **Focal Length**: decrease to **15** (wide establishing shot).
+5. **Camera Component → Film Back**: change preset to **16:9 DSLR**.
+6. Reposition the camera.
+7. **Exposure**: search "exposure" in the Details panel, enable
+   **Metering Mode**, set it to **Manual**; **Exposure Compensation** →
+   increase to **10**; increase **Aperture**.
+8. Outliner → search "fog" → select the **Exponential Height Fog** →
+   clear the search, decrease its fog **density**.
+9. Outliner → search for the **Directional Light** → increase sun
+   **Intensity** to **20**.
+10. Outliner → search "skylight" → Details panel → **Intensity Scale**
+    → increase to **3**, for a nicer ambient fill light.
+11. Directional Light again → **Source Angle** → increase it (bigger
+    visible sun size).
+12. Reposition the Directional Light.
+13. Result: a complete base lighting look — but the landscape itself
+    reads as too flat/even, motivating the sculpting pass next.
+
+## Chapter 13: Landscape sculpting and logic
+
+1. **Before sculpting, clear the PCG-scattered trees** so they don't get
+   in the way (and so they can be regenerated correctly afterward):
+   select each PCG tree actor (e.g. "PCG Tree" and "PCG Tree 2" from
+   Chapter 11) → Details panel → the **PCG Tool component** → click
+   **Cleanup** — removes the currently-spawned instances without
+   deleting the PCG setup itself.
+2. **Sculpt the landscape**: Landscape section → **Sculpt** tool,
+   decrease brush size, sculpt in some unevenness/variation across the
+   terrain (fully freeform — "you can make your own design").
+3. Use the **Smooth** tool afterward to soften harsh sculpted edges;
+   increase tool **Strength** and brush size as needed for broader
+   smoothing passes.
+4. Back to Selection mode, **re-enable Nanite** on the landscape (this
+   tutorial repeatedly needs Nanite re-confirmed after landscape edits,
+   same pattern noted in Chapter 9).
+5. **Regenerate the PCG systems** now that the ground has changed shape:
+   select each PCG tree actor → PCG Tool component → click **Generate**
+   (the counterpart to the Cleanup in step 1 — respawns instances
+   against the current landscape).
+6. **Increase tree size** on the second PCG area: PCG Tool component →
+   **Minimum Scale** → **1**, **Maximum Scale** → **1.4**.
+7. **Extend/shrink the scatter area** as needed: select the PCG actor,
+   press **G**, select a spline point, increase the area; individual
+   spline points can also be selected and deleted to shrink an area.
+8. **Scale up trees near the spline edge** (previously thinned out by
+   the Edge Followup setting) — on each PCG actor's Tool component,
+   increase **"Edge Falloff Scale Minimum"** (tutorial sets **1** on one
+   area, **1.2** on the other).
+9. **Color variation on the trees**: select the **Global Foliage
+   System** actor → Details panel → **Season Strength** and **Health**
+   parameters. Increasing Season Strength and decreasing Health
+   introduces color randomization across the trees (then Health is
+   nudged back up slightly for a subtler variation rather than an
+   extreme one).
+10. Manually delete any individual stray/misplaced trees as needed.
+11. Plan: add ground-cover grass next — downloading a Fab asset pack for
+    it, leading into Chapter 14.
+
+## Chapter 14: Grass system integration
+
+1. **Source asset**: Megascans **"Forest Path"** pack (referred to as
+   "mega scans forest path") → **Add to Project**.
+2. After download: a folder (named something like "MS Forest Tool") —
+   disable any active filters, then enable the **Static Mesh** filter
+   via the hamburger/three-line icon.
+3. **Batch-enable Nanite**: select *all* the static mesh assets at once,
+   right-click → enable **Nanite** for the whole selection in one step
+   (rather than one at a time).
+4. Drag a grass asset into the scene to preview it.
+5. **Enable Voxelization on a grass asset**: double-click to open it,
+   under **Shape Preservation**, enable **Voxalize**.
+   - Note the direction here is the **opposite** of the earlier tree fix
+     in Chapter 10 (which changed *away* from Voxalize *to* Preserve
+     Area to fix transparent trunks) — grass evidently benefits from the
+     opposite Nanite handling. Treat each asset type's correct setting
+     as something to check visually rather than assuming one setting
+     fits everything.
+6. Save, close.
+7. **Scatter the grass using the same PCG system** (Static Mesh spawning
+   this time, not Spawn Actor, since grass is a plain static mesh, not a
+   Blueprint):
+   - Deselect everything (collapse the level in the Outliner, click
+     outside).
+   - Selection mode → **PCG → Draw Spline Surface**, draw a new area.
+   - **Sampling** tab: enable, increase **Points** (density) to **5**.
+   - **Point Size**: enable, decrease to **20x20**.
+   - Since the asset is a Static Mesh: use the **Static Mesh** spawning
+     option (instead of Spawn Actor/Actor Classes used for the trees) →
+     click **+** → drag the grass static mesh asset in.
+   - **Projection**: enable **Snap to Surface**, activate (same fix as
+     the trees in Chapter 11, applied here from the start).
+   - **Global Transform → Edge Falloff**: enable, adjust value slightly.
+   - Press **G** to preview the scattered grass.
+   - **Randomization** (Random Transform, enable all sub-options):
+     - **Random Position Offset**: Min X = **-100**, Y = **-100**; Max
+       X = **100**, Y = **100**.
+     - **Random Rotation**: Min = **-360**, Max = **360**.
+     - **Scale**: Min = **1.5**, Max = **2**.
+   - Press **G** to check the result; fine-tune **Edge Followup** down
+     slightly afterward for better blending at the spline's edge.
 
 ---
 
