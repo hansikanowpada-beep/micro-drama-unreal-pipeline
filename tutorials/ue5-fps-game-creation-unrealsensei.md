@@ -25,12 +25,13 @@ node-graph fundamentals, migrating assets (chapter 6-7), a finished
 `BP_Target` (chapter 8), a fully working score system (chapter 9), a
 complete score UI (chapter 10), graph organization tools (chapter 11),
 dynamic target counting plus a working win condition (chapter 12), a
-complete `WBP_EndScreen` (chapter 13), and a fully working countdown
-timer with a lose condition, including the `Expose on Spawn` technique
-for passing a `Lost Game?` flag straight into the widget at creation
-time (chapter 14, cut off right as the win/lose text branching is
-about to be wired up). Chaos physics destruction and final environment
-assembly haven't been covered yet.
+complete `WBP_EndScreen` (chapter 13), a fully working countdown timer
+and lose condition refactored into a single `Show End Screen` custom
+event (chapter 14), and the start of a custom `BP_Rifle` weapon
+Blueprint — removed from the character, spawned and attached to the
+`grip_point` socket at game start (chapter 15, cut off right as the
+weapon's own fire logic needs rebuilding). Chaos physics destruction
+and final environment assembly haven't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -1156,15 +1157,123 @@ Graph tab, not just the static Designer view):
       Unreal to re-scan the widget class and expose the newly-added
       spawn parameter.
 
-*Transcript cuts off here, right as the creator begins explaining how
-the win path explicitly sets `Lost Game?` to false ("now down here when
-the player wins the game we want to make...") — likely continues into
-using this flag inside `WBP_EndScreen`'s `Event Construct` to actually
-switch the displayed text between "You Won!" and "You Lost!".*
+19. **Setting `Lost Game?` on each path**: on the **win** Create Widget
+    call, explicitly set `Lost Game?` to **False**; on the **lose**
+    Create Widget call, explicitly set it to **True**.
+20. Test: losing now correctly shows "you lost" — but **a new bug**:
+    restarting and winning instead now shows **both** the win screen
+    and lose screen stacked on top of each other. Root cause: the timer
+    was never actually stopped on the **win** path — only the lose
+    branch sets `Game Over? = True`, so the countdown kept ticking after
+    a win, eventually hit 0, and fired the lose condition too.
+    - **Fix**: copy the `Set Game Over? = True` node from the lose
+      branch and paste it into the win branch as well — winning now
+      also halts the timer, so a win can never simultaneously trigger a
+      lose.
+21. **Refactor — consolidate duplicated logic into a Custom Event**: the
+    graph now has two nearly-identical node chains (win and lose) that
+    each create the end screen and stop the player, differing only in
+    the `Lost Game?` value passed in. Rather than maintaining two
+    copies:
+    - Select the whole End Screen creation/player-stop node chain,
+      copy it.
+    - Create one new Custom Event, **"Show End Screen"**, with a
+      `Lost Game?` Boolean input — paste the copied nodes into it and
+      wire them up.
+    - Delete the duplicated chains from both the win and lose branches,
+      replacing each with a single call to **Show End Screen** — the
+      win path passes **False**, the lose path passes **True**.
+    - Framed as a general principle, not just a one-off fix: "whenever
+      logic is continually repeated, you want to add that to an event
+      or a function."
+22. Final test: hitting all targets before time runs out shows the win
+    screen; letting the timer expire shows the lose screen — both now
+    work correctly and independently, with no double-trigger bug.
+23. **Chapter 14 recap** (creator's own words): created a timer that
+    runs every 0.01 seconds; it first checks whether the game is
+    already over, and if not, decrements `Time`, updates the UI, and
+    checks whether `Time` is ≤ 0 — if so, calls `Show End Screen`,
+    which creates the end screen and tells it whether or not the game
+    was lost, so the widget knows not to override the win text with the
+    lose text (or vice versa).
+
+## Chapter 15: Weapon Blueprint
+
+1. **Motivation**: the game currently lacks "game feel" — firing isn't
+   satisfying, and the gun itself doesn't look great. Plan: build a
+   fully custom weapon from scratch, as its own separate, reusable
+   Blueprint (rather than built directly into the character, as the
+   First Person template ships it).
+2. **Why separate the weapon from the character**: fine to leave it
+   embedded if a game only ever has one weapon, but as soon as a game
+   needs multiple weapons the player can hold or swap between, it's
+   standard practice to give the weapon its own Blueprint class instead
+   of baking it into the character.
+3. **Removing the built-in weapon** from `BP_FirstPersonCharacter`:
+   - Delete the weapon mesh component from its Viewport, along with an
+     associated helper "arrow" component tied to it.
+   - In the Event Graph, select and delete all the existing firing
+     logic nodes.
+   - Compile — produces an error: the **Construction Script** was still
+     trying to attach the now-deleted weapon to the arms. Delete that
+     node too, re-compile cleanly.
+4. **Create the weapon's own Blueprint**: Ctrl+Space → Blueprints
+   folder → right-click → **Blueprint Class** → **Actor** (an Actor,
+   since this rifle needs to be independently placeable/spawnable in
+   the world) → name it **`BP_Rifle`**.
+5. Open it and set up the mesh: Unreal's own default weapon mesh is
+   available but the creator prefers a nicer-looking option — drag in
+   a mesh from the free **"Sci-Fi weapon"** pack (part of the same
+   custom assets download from Chapter 6) directly onto the Blueprint's
+   default Scene Root. Delete the leftover placeholder icon once a real
+   mesh is attached.
+   - **Optional — add a scope**: drag in a separate Scope static mesh,
+     position it on top of the rifle.
+6. Compile — now have a standalone, reusable rifle Blueprint. Goal:
+   have it spawn automatically attached to the player's hand, rather
+   than being manually placed in the level.
+7. **Spawning and attaching the weapon** — back in
+   `BP_FirstPersonCharacter`'s `Event BeginPlay`:
+   - Drag out, add **"Spawn Actor from Class"**, select `BP_Rifle`.
+   - For its **Spawn Transform** input (location+rotation+scale
+     together, unlike a plain location vector — doesn't matter much
+     initially since it's about to be re-attached): drag out the
+     character's **Arms** component, call **"Get World Transform"** on
+     it, plug that in.
+   - Enable **Spawn Collision Handling → "Always Spawn, Ignore
+     Collisions"** — guarantees the weapon always successfully spawns
+     even if its initial position would otherwise overlap something
+     (so the player never ends up without a gun due to a failed spawn).
+   - From the Spawn Actor node's return value, drag out and add
+     **"Attach Component to Component"**, targeting the **Arms**
+     component as the parent.
+   - **Socket name**: type the exact (case-sensitive) socket name —
+     **`grip_point`** — a predefined attach point on the character's
+     hand mesh specifically for holding weapons.
+   - Attachment rule: **not** "Keep Relative" — instead set **Location,
+     Rotation, and Scale** all to **"Snap to Target"**, so the weapon
+     snaps exactly onto the grip socket rather than offsetting from
+     wherever it happened to spawn.
+8. Compile and test: the rifle now spawns and attaches correctly to the
+   player's hand as soon as the game starts.
+9. **Reusability payoff**: this spawn-and-attach logic doesn't care
+   which weapon class gets spawned — swapping in a different weapon
+   Blueprint (e.g. a shotgun) later would just mean changing which
+   class `Spawn Actor from Class` targets here, with no other logic to
+   rewrite.
+10. **New problem**: firing (left mouse button) no longer does anything,
+    since all the original firing logic was deleted from the character
+    Blueprint back in step 3 — it needs to be rebuilt, presumably
+    inside `BP_Rifle` itself this time rather than the character.
+
+*Transcript cuts off here, right as this firing-logic gap is raised
+("that is pretty obviously if I press the left mouse button we don't
+fire the weapon, also if I...") — likely continues into building the
+weapon's own fire logic from scratch inside `BP_Rifle`.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the win/lose text branching, Chaos physics
-destruction, and adding the finished game to an environment) and this
-file will be updated.*
+video (building the weapon's fire logic, Chaos physics destruction, and
+adding the finished game to an environment) and this file will be
+updated.*
