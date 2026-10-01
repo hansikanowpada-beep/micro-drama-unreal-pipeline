@@ -2,14 +2,14 @@
   "scene_id": "toot_sc01_estate_exterior",
   "episode": "the_ocean_of_time",
   "int_ext": "EXT",
-  "location": "Sharma Estate",
+  "location": "Sharma Estate (urban setting — a large family mansion within the city, not an isolated rural property)",
   "time_of_day": "DAY",
   "characters": [],
   "camera": "wide_shot",
   "lighting_notes": "Harsh, unyielding overhead sun — high Directional Light intensity, small Source Angle for hard-edged shadows (opposite of the soft dusk look used elsewhere). Matches the script's 'sun beats down with heavy, unyielding light.'",
-  "action": "Establishing shot. An imposing, traditional mansion surrounded by high stone walls.",
+  "action": "Establishing shot. An imposing mansion surrounded by high stone walls, set within an urban skyline/cityscape — production decision: the whole episode is set in an urban environment rather than a traditional rural estate, so the mansion should read as an old-money house standing out within the city, not a standalone countryside property.",
   "dialogue": [],
   "narration": [],
   "duration_estimate_seconds": 4,
-  "continuity_notes": "Pure establishing shot, no characters or dialogue. Sets the Sharma Estate location used again in sc02 and sc08."
+  "continuity_notes": "Pure establishing shot, no characters or dialogue. Sets the Sharma Estate location used again in sc02 and sc08. See ASSET_SOURCING.md for the urban-asset plan (City Sample as the backdrop city, the mansion itself built/dressed separately within it)."
 }

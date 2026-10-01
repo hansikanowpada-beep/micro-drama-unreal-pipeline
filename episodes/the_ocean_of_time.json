@@ -22,13 +22,14 @@
     {"cast_id": "doctor", "name": "Doctor", "age_range": "40s", "description": "Clinical, tasked with delivering grave news."},
     {"cast_id": "priya", "name": "Priya", "age_range": "20s", "description": "Rohit's secret girlfriend."}
   ],
+  "setting": "Urban — the whole episode takes place within a single city, not a mix of urban and rural locations. See ASSET_SOURCING.md for the urban-asset plan anchored on Epic's free City Sample content.",
   "locations": [
-    "Sharma Estate (exterior, living room, study)",
-    "Wedding Mandap",
-    "Rohit & Ananya's Apartment",
+    "Sharma Estate (exterior, living room, study) — an old-money mansion within the city",
+    "Wedding Mandap — hosted at an urban venue (banquet hall garden/terrace), not an isolated rural field",
+    "Rohit & Ananya's Apartment — a city apartment",
     "Downtown Cafe",
-    "Clinic (operating room, recovery room)",
-    "Barren Coastline"
+    "Clinic (operating room, recovery room) — an urban hospital/clinic",
+    "Barren Coastline — the one location that stays outside the city proper, for the episode's closing tonal shift"
   ],
-  "status": "scene breakdown complete; no character or environment assets built yet (see PIPELINE_STATUS.md)"
+  "status": "scene breakdown complete, urban setting direction confirmed; no character or environment assets built yet (see ASSET_SOURCING.md and SCENE_FORMAT.md)"
 }
