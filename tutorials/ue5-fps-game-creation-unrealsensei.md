@@ -20,13 +20,15 @@ Captured from the video transcript (screenshots, not watched directly)
 — double-check exact button labels against the live video.
 
 Status: **partial capture** — covers the intro, all the foundational
-editor basics (chapters 3-4), an introduction to Blueprint editor
-vocabulary (chapter 5), node-graph fundamentals including a live
-"Hello World" demo, migrating the game's weapon/target assets from a
-separate downloadable project, and the start of the first custom
-Blueprint (`BP_Target`, an Actor-class Blueprint) — cut off right as
-the target mesh is about to be added to it (chapter 8). The actual
-shooting/scoring/UI/physics logic for the game hasn't started yet.
+editor basics (chapters 3-4), Blueprint editor vocabulary (chapter 5),
+node-graph fundamentals, migrating assets (chapter 6-7), a finished
+`BP_Target` with hit detection restricted to actual projectiles via a
+Cast node (chapter 8), and the start of a custom `GM_TargetGame` Game
+Mode — default pawn, a crosshair HUD, and an Integer variable used to
+store/read a value via Get and Begin Play (chapter 9, cut off right as
+Set is introduced to change that value at runtime). Win/lose conditions,
+the countdown timer, Chaos physics destruction, and final assembly
+haven't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -495,17 +497,128 @@ just inspecting the existing First Person Character Blueprint earlier):
 5. Double-click to open the new Blueprint — it's completely blank
    except for a small widget icon in the middle of the viewport,
    representing the Blueprint's **Scene Root** (its origin point).
-6. **Adding the target mesh as a component**: in the Content Browser,
-   navigate to the migrated **Target** static mesh asset — the
-   transcript cuts off right as this step begins ("go to Target right
-   here and we have that static mesh so there are two...").
+6. **Adding the target mesh as a component** — two ways:
+   1. Drag the migrated **Target** static mesh asset directly on top of
+      the default Scene Root in the Blueprint's Viewport and release —
+      adds it immediately (**Ctrl+Z** undoes it).
+   2. Or: **+ Add** → search "static mesh" → add a **Static Mesh
+      Component**, then in that component's own **Mesh** dropdown,
+      type/select "Target".
+   - The drag-onto-root method (#1) is the quicker of the two.
+7. **Compile**.
+8. **Place it in the world**: drag `BP_Target` from the Content Browser
+   (First Person → Blueprints folder) into the level. Since it's a
+   Blueprint, **Alt+drag** duplicates it around the level same as any
+   other object (disable snapping first, as covered in Chapter 4).
+9. **Shortcut — reopening a placed Blueprint's editor quickly**: select
+   a placed Blueprint instance in the level and press **Ctrl+E** to
+   open its asset editor directly, instead of manually hunting for it
+   in the Content Browser.
+10. **Adding hit-detection logic**: select the **Static Mesh component**
+    (not the Scene Root) in the Blueprint, scroll down the Details
+    panel to find **"On Component Hit"**, click its **+** to create
+    that event. Two other similar-but-unneeded hit-related event stubs
+    appear alongside it by default — delete those, only the one needed
+    is kept.
+11. Connect a **Print String** to confirm it's firing: text set to
+    `Target hit!`, text color changed to **reddish** (plain
+    white/default text is hard to read against the blue sky
+    background), **Duration** set to **5** seconds.
+12. Press Play, fire the weapon at a target — confirms the event fires
+    ("Target hit!" prints).
+    - **Bug found**: simply *walking into* / touching the target also
+      triggers it — because **On Component Hit** fires for literally
+      any actor that collides with the mesh, not just the projectile.
+13. **Fix — restrict the event to projectile hits only**: drag from the
+    event's **Other Actor** output pin, type **"Cast To"**, and select
+    the projectile Blueprint's class — `BP_FirstPersonProjectile` (the
+    bullet/sphere spawned when the weapon fires). This inserts a
+    **Cast** node.
+    - Brief explanation of casting (described as "a whole other
+      lesson," kept short here): the Cast node asks "is the actor that
+      just hit my static mesh actually a First Person Projectile?" — if
+      **yes**, everything connected to its success output executes; if
+      **no**, that logic simply doesn't run.
+14. **Re-test the fix**: delete two of the three placed Targets to
+    simplify testing, scale up the remaining one, reopen the
+    `BP_Target` Blueprint, press Play:
+    - Firing at the target still correctly prints "Target hit!".
+    - Walking directly into the target now does **nothing** — execution
+      reaches the Cast node and stops there, since the player character
+      isn't a `BP_FirstPersonProjectile`. Bug confirmed fixed.
+15. **Next requirement**: track *how many* targets have been hit (so the
+    game can later detect when all targets are destroyed and the player
+    wins) — this needs somewhere to actually store that count, which
+    leads into Chapter 9.
 
-*Transcript cuts off here, mid-sentence, right as the target mesh is
-about to be added to the new Blueprint as a component.*
+## Chapter 9: Gamemode
+
+1. **What a Game Mode is**: a Blueprint that governs a game's overall
+   rules/features — e.g. in Capture the Flag, the Game Mode tracks how
+   many flags each team has captured. In this project, the Game Mode
+   will track how many targets have been hit and the countdown timer.
+   - The First Person template already ships with a default Game Mode,
+     but the tutorial deliberately builds a new one from scratch to
+     demonstrate the process.
+2. **Create it**: right-click in the Content Browser → **Blueprint
+   Class** → search/select **Game Mode Base** as the parent class →
+   name it **`GM_TargetGame`** (`GM_` prefix, same personal-convention
+   pattern as `BP_` for regular Blueprints).
+3. Open it. Unlike an Actor Blueprint, a Game Mode Blueprint opens
+   straight to a Details-style defaults panel rather than a Viewport —
+   a Game Mode isn't itself a placeable world object, it governs rules
+   instead.
+4. **Set Default Pawn Class**: controls which Blueprint the player
+   actually controls/possesses. Currently set to the generic "Default
+   Pawn" — change it to **`BP_FirstPersonCharacter`**.
+5. **Assign this Game Mode to the level**: back in the main map, open
+   **Window → World Settings** (hidden by default — same "open a
+   non-default window" technique as Chapter 4), find **Game Mode
+   Override**, and select the new `GM_TargetGame`.
+6. **Add a crosshair/reticle**: nothing shows on-screen to indicate aim
+   point by default. In the same World Settings area, under **HUD**,
+   select **"First Person HUD"** — a widget asset that came in with the
+   assets migrated back in Chapter 7 — and assign it as this Game
+   Mode's HUD.
+7. Press Play — confirms a small crosshair now appears centered on
+   screen.
+8. **Tracking the hit count — Variables**:
+   - Concept: variables store data, same as in any programming
+     language.
+   - Create one: in the Game Mode Blueprint's **My Blueprint** panel,
+     click **+** next to Variables, name it (demo uses `MyVar`), choose
+     its **type** — selects **Integer** (a whole number).
+   - **Compile** — a newly created variable can't actually be dragged
+     into the graph until it's been compiled at least once.
+   - Set a default value directly in the Details panel while the
+     variable is selected (demo sets **20**).
+   - Drag the variable into the Event Graph — prompts a choice between
+     **Get** (reads the current value) and **Set** (overwrites it).
+     Dragging it also auto-creates two placeholder custom-event node
+     stubs, which get deleted since they aren't needed here.
+   - **Demo — reading it on game start**: bring back the **Begin Play**
+     event (fires automatically once, at the very start of the game) →
+     connect **Get MyVar** → **Print String** (Print String's text
+     input pin automatically converts the integer into text) → set the
+     text color to red for visibility against the sky → **Compile**.
+   - Confirm the level's World Settings still has `GM_TargetGame`
+     selected, so this Blueprint's Begin Play actually fires.
+   - Press Play — **"20"** prints in the top-left corner, confirming the
+     variable correctly holds and outputs its stored value.
+   - **Changing a variable's value at runtime**: drag the variable out
+     again, this time choosing **Set** instead of Get — lets you
+     overwrite its stored value during gameplay (continuing from
+     `Event Begin Play`; the transcript cuts off right as this `Set`
+     node setup begins).
+
+*Transcript cuts off here, right as the `Set MyVar` node is being wired
+up — likely continues into actually incrementing the hit counter each
+time a target is destroyed.*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the Target Blueprint, weapon/shooting logic, UI, Chaos
-physics destruction, and adding the finished game to an environment)
-and this file will be updated.*
+video (incrementing the hit counter on target destruction, win/lose
+conditions, the countdown timer, UI, Chaos physics destruction, and
+adding the finished game to an environment) and this file will be
+updated.*
