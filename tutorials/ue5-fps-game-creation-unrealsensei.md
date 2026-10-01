@@ -25,11 +25,12 @@ node-graph fundamentals, migrating assets (chapter 6-7), a finished
 `BP_Target` (chapter 8), a fully working score system (chapter 9), a
 complete score UI (chapter 10), graph organization tools (chapter 11),
 dynamic target counting plus a working win condition (chapter 12), a
-complete `WBP_EndScreen` with a restart button, input-mode/mouse-cursor
-handling, and a blurred background (chapter 13), and the start of a
-countdown timer (chapter 14, cut off right as "Set Timer by Event" is
-introduced). The lose condition, Chaos physics destruction, and final
-environment assembly haven't been covered yet.
+complete `WBP_EndScreen` (chapter 13), and a fully working countdown
+timer with a lose condition, including the `Expose on Spawn` technique
+for passing a `Lost Game?` flag straight into the widget at creation
+time (chapter 14, cut off right as the win/lose text branching is
+about to be wired up). Chaos physics destruction and final environment
+assembly haven't been covered yet.
 
 ## Chapter 1: Intro
 
@@ -1053,18 +1054,117 @@ Graph tab, not just the static Designer view):
    select the `Add Score` event and its whole connected node group,
    nudge it down to make room above for the new timer logic.
 7. At the very end of `Event Begin Play` (after the initial score UI
-   setup), add a new **Custom Event** named **"Set Timer by Event"** —
-   referencing Unreal's actual built-in **Set Timer by Event** node,
-   used to schedule a function to run repeatedly or after a delay.
+   setup), drag out Unreal's built-in **"Set Timer by Event"** node —
+   this schedules a given custom event to run after a delay (and
+   optionally repeatedly).
+   - **Correction from the previous capture**: "Set Timer by Event" is
+     the built-in scheduling node itself, not something you name
+     yourself — you separately create your *own* custom event and plug
+     it into this node's **Event** input. Create one called
+     **"Decrease Counts"** and connect it.
+8. **How Set Timer by Event works** (demonstrated step by step):
+   - It needs a **Time** input (seconds until the connected event
+     fires) — set to **1** second initially.
+   - Demo: wire a `Print String` ("Decrease Count is activated") off
+     the `Decrease Counts` event, press Play — confirms it fires once,
+     after 1 second, then **stops** (doesn't repeat by default).
+   - Enable the **Looping** checkbox on Set Timer by Event — now the
+     event re-fires every interval indefinitely (1s, 2s, 3s, ...).
+   - Lower Time to **0.1** seconds — fires much more frequently.
+9. **The actual countdown variable**: create `Time` (Integer), default
+   value **500** — a difficulty-tunable "unit count," not literal
+   seconds (its real duration depends on both this starting value and
+   the tick rate below).
+   - Inside `Decrease Counts`: Ctrl+drag `Time` in as **Get**, subtract
+     1 (the `--` decrement node), **Set** it back. Delete the debug
+     Print String.
+   - **Tick rate**: lower Set Timer by Event's Time input further, to
+     **0.01** seconds (100 ticks/second) — so even though `Time` only
+     decrements by 1 per tick, it visibly counts down fast from 500 to
+     0 (and, unaddressed at this point, keeps going negative).
+10. **Displaying the timer in the UI**: duplicate the Score Text
+    (Ctrl+C/V), set its displayed text/name to "Time," anchor it to the
+    **top-right** corner, rename the widget itself **"Time Text"** in
+    the Hierarchy.
+    - In the UI's graph: create a new Custom Event **"Update Time"**
+      with an Integer input (same pattern as `Update Score` /
+      `Current Score` from Chapter 10).
+    - `Get Time Text` → `Set Text`, formatted through an **Append**
+      node: Sentence A = literal `"Time "`, Sentence B = the integer
+      input (auto-converted) — combines into "Time 500", etc.
+11. **Calling Update Time from the Game Mode**: after decrementing
+    `Time` in `Decrease Counts`, call the stored widget reference's
+    `Update Time` event, passing the new value. Also call it once from
+    `Event Begin Play` (so the display shows the correct starting value
+    immediately, before the first tick) — copy the two nodes
+    (`Get User Interface` → `Update Time` call) to both places, reusing
+    the existing widget-reference variable rather than re-fetching it.
+12. Play — confirms a working on-screen countdown from 500 to 0 (still
+    continuing into negative numbers at this point, fixed next).
+13. **Tuning difficulty**: the starting `Time` value is the main lever —
+    tried **100** (ends almost instantly, too fast), settled on **400**
+    as a reasonable value for this game.
 
-*Transcript cuts off here, right as the Set Timer by Event node's
-purpose is about to be explained ("what this node will do is that any
-event that is hooked up to this node...") — likely continues into
-building the countdown-timer tick logic and the lose condition.*
+**Lose condition**:
+
+14. Compare `Time` to 0: drag from `Time`, type `<=` ("less than and
+    equal"), check against **0**. Hold **B** + click for a **Branch**,
+    feed in this comparison's result.
+    - If **True** (time's up): placeholder `Print String` — "YOU LOST"
+      — to be replaced with the real End Screen shortly.
+15. **Bug — the lose condition keeps re-firing**: since the Set Timer
+    loop keeps ticking every 0.01s indefinitely, once `Time` hits 0 the
+    lose branch re-triggers on every subsequent tick too, not just
+    once.
+16. **Fix — a `Game Over?` Boolean gate**: create `Game Over?`
+    (Boolean), set it to **true** inside the lose branch (and,
+    implicitly, the win branch too) once the game actually ends.
+    - At the very start of `Decrease Counts`, before doing anything
+      else: Ctrl+drag `Game Over?` in as **Get**, run it through a
+      **NOT Boolean**, and gate the rest of the tick logic behind a new
+      **Branch** on that — the timer only keeps decrementing/checking
+      while the game is *not* already over.
+    - Re-tested: `Time` now counts down and stops cleanly at 0, "YOU
+      LOST" prints exactly once.
+17. **Replacing the placeholder with the real End Screen** — reusing
+    the win condition's existing widget-creation logic (`Create Widget`
+    → `Add to Viewport` → `Set Input Mode UI Only` → `Show Mouse
+    Cursor` → `Set Ignore Move Input`), since it's identical between
+    win and lose except for the displayed message:
+    - Select that whole node group from the win branch, **Ctrl+C/V** to
+      duplicate it, wire the lose Branch's True pin into the copy.
+    - **Problem**: this produces two *separate* End Screen creation
+      calls that happen to show the exact same hardcoded "You Won!"
+      text — losing would incorrectly display a win message, and
+      duplicating the whole widget just to swap text is wasteful.
+18. **Fix — a `Lost Game?` flag passed in via "Expose on Spawn"** (a
+    genuinely useful, reusable technique for initializing a widget with
+    data right at creation time, rather than calling a separate custom
+    event afterward):
+    - In `WBP_EndScreen`: create a Boolean variable **`Lost Game?`**
+      (default **false** — false = player won, true = player lost).
+    - Select this variable in the Variables panel, enable
+      **"Instance Editable"** and, crucially, **"Expose on Spawn"**.
+    - Back in the Game Mode: the **Create Widget (WBP_EndScreen)**
+      node now shows a new input pin for `Lost Game?` directly on the
+      node itself — set it to **True** on the lose path's Create
+      Widget call, leave it at its default (False) on the win path's —
+      no second widget or custom event call needed just to pass this
+      one flag in.
+    - **Troubleshooting — the new pin doesn't appear**: right-click the
+      `Create Widget` node and select **"Refresh Nodes"** to force
+      Unreal to re-scan the widget class and expose the newly-added
+      spawn parameter.
+
+*Transcript cuts off here, right as the creator begins explaining how
+the win path explicitly sets `Lost Game?` to false ("now down here when
+the player wins the game we want to make...") — likely continues into
+using this flag inside `WBP_EndScreen`'s `Event Construct` to actually
+switch the displayed text between "You Won!" and "You Lost!".*
 
 ---
 
 *To extend: send more transcript/screenshots from later parts of this
-video (finishing the countdown timer, the lose condition, Chaos physics
+video (finishing the win/lose text branching, Chaos physics
 destruction, and adding the finished game to an environment) and this
 file will be updated.*
