@@ -19,22 +19,16 @@ is distinct from the environment-building tutorials.
 Captured from the video transcript (screenshots, not watched directly)
 — double-check exact button labels against the live video.
 
-Status: **partial capture** — covers the intro, all the foundational
-editor basics (chapters 3-4), Blueprint editor vocabulary (chapter 5),
-node-graph fundamentals, migrating assets (chapter 6-7), a finished
-`BP_Target` (chapter 8), a fully working score system (chapter 9), a
-complete score UI (chapter 10), graph organization tools (chapter 11),
-dynamic target counting plus a working win condition (chapter 12), a
-complete `WBP_EndScreen` (chapter 13), a fully working countdown timer
-and lose condition (chapter 14), a complete `BP_Rifle` weapon
-Blueprint (chapter 15), a complete custom `BP_Bullets` projectile
-(chapter 16), a complete Chaos Destruction system fully wired into
-real Geometry Collection Targets (chapter 17), and the start of
-Chapter 18 (Environment) — migrating the finished game into Epic's
-free "Electric Dreams"/PCG sample content (or the companion Starter
-Course's own Castle Forest environment), cut off right as the
-character/Blueprint migration into the new level begins. This appears
-to be the video's final remaining topic.
+Status: **complete capture** — covers the entire video start to finish,
+all 19 chapters: editor fundamentals, Blueprint/node-graph basics,
+asset migration, a complete `BP_Target`, a full score system and UMG
+UI, graph organization, dynamic target counting and a win condition, a
+complete win/lose end-screen system with a countdown timer, a custom
+`BP_Rifle` weapon and `BP_Bullets` projectile, a full Chaos Destruction
+system, migrating the finished game into a real environment (Epic's
+free Electric Dreams/PCG sample content), final level-design/
+playtesting polish, and the outro. This is now the third of five
+tutorial files in this repo captured fully end-to-end.
 
 ## Chapter 1: Intro
 
@@ -1767,16 +1761,119 @@ force-field actor:
     exit Play. Select a placeholder descriptive-text object sitting in
     the scene (in the way of the shot), press **Delete** to remove it.
 
-*Transcript cuts off here, right as the actual migration of the FPS
-game's assets/Blueprints into this new environment begins — likely
-continues into bringing `BP_FirstPersonCharacter`, `GM_TargetGame`,
-`WBP_UI`/`WBP_EndScreen`, and the Target/rifle Blueprints into the
-Electric Dreams or PCG Close Range level, setting the new level's Game
-Mode Override, and placing Targets throughout it — the video's final
-remaining topic.*
+11. **Migrating the whole game in one step**: open the original FPS
+    project, Ctrl+Space → First Person Blueprints → find
+    `GM_TargetGame` → right-click → **Asset Actions → Migrate**. Unreal
+    scans the *entire* project and automatically finds every asset that
+    Game Mode (transitively) references — the player character, the
+    bullet, the rifle, and all of their materials — so nothing gets
+    missed by migrating just one Blueprint.
+12. Click **OK**, navigate to the new environment project's **Content**
+    folder, select it — this copies everything across into the
+    Electric Dreams (or PCG Close Range) project.
+13. **Switching the environment's Game Mode**: this sample project ships
+    its own default Game Mode (`GM_AnimSandbox` in this case) — check
+    via **World Settings → Game Mode**. Ctrl+Space to confirm the
+    migrated `GM_TargetGame` landed in the same First Person Blueprints
+    folder structure, then set it as the **Game Mode Override**.
+14. Press **Play** — instead of the sample's default drone camera, the
+    player now spawns as the actual First Person character and can walk
+    around and fire normally. The whole game has been successfully
+    transplanted into the new environment.
+15. **Troubleshooting — Time runs out almost immediately in this larger
+    space**: increase the starting `Time` value in `GM_TargetGame` to
+    something much larger (**5000**) to account for the bigger
+    environment — to be tuned back down after a real playtest.
+16. Exploring confirms the weapon/game feel works well in a real
+    environment: firing at random vegetation/rocks, jumping over a log
+    to continue exploring. Score reads "0/0" since no Targets exist in
+    this environment yet.
+17. Minor cleanup: a decorative floating sphere object in the sample
+    (showcasing Unreal's newer **Substrate** material system — flagged
+    as a topic for a future dedicated video) is deleted since it's just
+    in the way, not needed for this game.
+18. **Placing Targets in the new environment**: Ctrl+Space, drag a
+    Target in, rotate/scale it, disable snapping — same workflow as
+    placing any other object throughout this tutorial.
+19. **Troubleshooting — Player Start spawns the player in the wrong
+    spot**: the sample project's own default Player Start is elsewhere
+    in the level.
+    - Fix: press **G** to exit Game View and see it directly, then
+      either reposition the existing one or delete it and place a new
+      **Player Start** (Add → Basics → Player Start), rotated to face
+      toward the Targets.
+20. Play — confirms destroying Targets correctly increments the score
+    in this new environment too.
+21. **Troubleshooting — a collision mismatch can block bullets in some
+    environments** (general technique, not needed in this particular
+    sample since no stray collision happened to be in the way here):
+    - Check actual collision geometry directly via the viewport's
+      **View Mode** dropdown → **Player Collision** — visualizes
+      collision shapes so you can see exactly what's blocking what,
+      since "the player collision on my world is different from what
+      the player thinks the collision will be."
+    - If a specific prop's simplified collision shape is blocking
+      bullets at a point where its visual mesh doesn't actually extend:
+      select that static mesh, **Ctrl+E** to open its own asset editor,
+      scroll to **Collision**, change from **Project Default** to
+      **"Use Complex Collision as Simple"** — makes its collision match
+      the real visual geometry exactly, fixing false blocks.
+22. **Final level-design pass** (the creator's own framing: "this part
+    can be really fun — we aren't even opening any Blueprints, we're
+    not doing anything complicated, all we're doing is moving Targets
+    around, creating new ones, and trying to make the game as fun as
+    possible, also adjusting how challenging it is"):
+    - **Tip — locking the camera to an object while moving it**: hold
+      **Shift** while repositioning an object to lock the camera to it,
+      so you can orbit the view around it without separately needing to
+      move the camera yourself — "I get to slow down, Shift to lock it
+      there."
+    - **Level-design principle — targets as implicit player guidance**:
+      deliberately placing Targets so the player is naturally led
+      through the space (around a rock formation, toward the next
+      target in sequence) rather than scattering them randomly — target
+      placement itself functions as a soft path/breadcrumb trail.
+    - A dramatic oversized **"massive" bonus Target** is placed as a
+      capstone — "something a ridiculous size... for the player to
+      hit."
+23. **Tuning the difficulty via actual playtesting** (not guesswork):
+    play through the whole level once, noting dead stretches with
+    nothing to shoot (fix: add another Target there to keep the player
+    engaged throughout, not just at isolated points) and how much time
+    is left at the end. First playtest finishes with **200** of the
+    starting **5000** Time remaining — informs narrowing the starting
+    value down to a tighter **2500** for the real, final playthrough.
+
+## Chapter 19: Outro
+
+1. **Final playtest** with the tuned Time value (2500): races against
+   the clock through the whole level — hitting Targets along the
+   guided path, the massive bonus Target (its Chaos destruction
+   described as looking "like an avalanche"), and the final Target —
+   **wins the game**.
+2. **"Congratulations, you just created your first video game in Unreal
+   Engine"** — finishes with **75** seconds/units of Time remaining,
+   described as "a good time to beat the game at."
+3. Closing remarks: thanks for watching, encourages subscribing,
+   mentions a follow-up course called **"The Unreal Game Developer"** —
+   described as a deeper dive into Blueprints covering the entire
+   process of building a full game from scratch through actually
+   uploading it online, link in the original video's description.
+4. Sign-off: "I hope to see you in the next video."
 
 ---
 
-*To extend: send more transcript/screenshots from later parts of this
-video (finishing the environment migration, which appears to be the
-video's final chapter) and this file will be updated.*
+**This completes the full tutorial** captured from this video, start to
+finish: editor fundamentals → Blueprint vocabulary and node-graph
+basics → migrating the project's starter assets → a complete Target
+Blueprint with projectile-only hit detection → a full score system →
+a working UMG score UI → graph organization → dynamic target counting
+and a win condition → a complete win/lose end-screen system with a
+countdown timer → a custom weapon Blueprint (spawn, fire, recoil,
+sound, muzzle flash) → a custom bullet projectile (emissive tracer,
+correct collision, impact VFX, crosshair-accurate aim) → a full Chaos
+Destruction system (Geometry Collections, Fracture, a bullet-triggered
+force burst) → migrating the entire finished game into a real
+environment (Epic's free Electric Dreams/PCG sample content) → final
+level-design/playtesting polish → a finished, playable, winnable FPS
+game built entirely from this one video.
