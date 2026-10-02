@@ -5,6 +5,14 @@ Research notes for the 6 locations used across the episode's 10 scenes
 Sketchfab listings found via web search, not yet verified hands-on —
 check licensing, included formats (must support Unreal, not just
 Unity/other engines), and actual current price before relying on them.
+
+**Alternative to buying a pack per building**: see
+`PLUGIN_ROADMAP.md` for **Buildify**, a Blender Geometry Nodes add-on
+that procedurally generates modular buildings, then exports to Unreal
+via a documented (if slightly manual) workaround. This is a real
+alternative path for the estate, clinic, and apartment building
+*exteriors* specifically — it doesn't help with interior furniture/
+props, which still need sourcing as below.
 **Free-pack note**: several "free" listings found below were
 **time-limited Epic giveaway promotions from 2025** (e.g. "free until
 July 29, 2025" / "free until Jan 28, 2025") — since today's date is
