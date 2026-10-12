@@ -8,6 +8,51 @@ discussed in this project only run in one engine, not the other.
 
 ## Pending
 
+### iClone 8 (Reallusion — animation/sequencing app)
+
+- **Status**: purchased. Not yet installed.
+- **What it is**: Reallusion's character animation/scene-sequencing
+  application, the companion to Character Creator 5 in Reallusion's
+  own "Avatar" pipeline — CC5 builds/sculpts the character, iClone
+  animates and stages it. Has its own Unreal export path ("iClone Auto
+  Setup," parallel to CC5's own Auto Setup plugin mentioned in
+  `PIPELINE.md`) — not yet verified which one this project will
+  actually use, or whether both get used for different purposes.
+- **Open question**: exact division of labor between CC5's Auto Setup
+  and iClone's own export/USD path once Omniverse is in the mix (see
+  next entry) — don't assume one replaces the other until tested.
+
+### NVIDIA Omniverse — USD Composer + Nucleus Workstation
+
+- **Status**: downloaded (offline/Launcher-free package, extracted to
+  a local `Composer` folder containing `create-2023.2.5`,
+  `nucleus-workstation-2023.2.3`, a `launchComposerNucleus_run_on_...`
+  batch file, and a `README`). Not yet installed/run.
+- **Install step**: **follow that package's own `README` first** — it's
+  the authoritative source for this specific offline installer, not
+  guessed instructions. The batch file name suggests it sets up both
+  Nucleus (the local asset-server/collaboration backend Omniverse apps
+  sync through) and Composer (the USD scene-composition app) together.
+- **What it's for in this project** (both confirmed goals):
+  1. **NVIDIA Audio2Face for lip-sync** — runs as an Omniverse app/
+     extension, generates facial animation from audio input. This is
+     now the leading lip-sync candidate in `PIPELINE.md`, pending
+     hands-on validation (including whether it needs retargeting setup
+     for a custom CC5/iClone face vs. only working well on its stock
+     example heads — unverified, needs testing).
+  2. **USD hub connecting iClone/CC5 to Unreal** — using Omniverse's
+     USD Connectors (Reallusion/Omniverse and Unreal both have them)
+     as a higher-fidelity alternative to plain FBX export. Exact
+     Connector names/versions needed, and whether they're separate
+     downloads from Composer itself, are **not yet confirmed** —
+     verify against NVIDIA's current Omniverse Exchange/app catalog
+     once Composer is actually installed and running.
+- **Caution**: this is a genuinely new, unverified part of the stack
+  for this project — don't assume exact menu paths or Connector names
+  without checking them live. Report back what the README/installer
+  actually shows so these notes can be corrected against real behavior
+  instead of guessed ahead of time.
+
 ### Buildify (Blender — Geometry Nodes add-on)
 
 - **What it is**: a modular-building generator built on Blender's
